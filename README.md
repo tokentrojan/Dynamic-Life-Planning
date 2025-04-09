@@ -1,3 +1,6 @@
 # Dynamic-Life-Planning
 
-Here are some comments in the read me file
+Things the team is doing:
+
+Jack: connecting firebase to the project and adding authentication
+
