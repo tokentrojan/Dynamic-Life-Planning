@@ -5,7 +5,7 @@ function AppNavbar() {
   return (
     <Navbar bg="light" expand="lg">
       <Container>
-        <Navbar.Brand href="/planner">Task Manager</Navbar.Brand>
+        <Navbar.Brand href="/planner">Dynamic Life Planning</Navbar.Brand>
         <Nav className="me-auto">
           <NavLink className="nav-link" to="/planner">Planner</NavLink>
           <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
