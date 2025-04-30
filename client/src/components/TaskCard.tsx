@@ -1,0 +1,44 @@
+import { Card, Badge } from 'react-bootstrap';
+import { Task } from '../types/Task';
+
+
+interface Props {
+  task: Task;
+}
+
+function TaskCard({ task }: Props) {
+  const getPriorityVariant = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'danger';
+      case 'medium': return 'warning';
+      case 'low': return 'success';
+      default: return 'secondary';
+    }
+  };
+
+  const formatDueDate = (isoDate: string) => {
+    const date = new Date(isoDate);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+    const year = date.getFullYear();
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${day}/${month}/${year} ${time}`;
+  }
+
+  return (
+    <Card className="mb-3 shadow-sm">
+      <Card.Body>
+        <Card.Title>{task.title}</Card.Title>
+        <Card.Subtitle className="mb-2 text-muted">
+          Due: {formatDueDate(task.dueDate)}
+        </Card.Subtitle>
+        <Card.Text>
+          Duration: {task.duration} min <br />
+          <Badge bg={getPriorityVariant(task.priority)}>{task.priority.toUpperCase()}</Badge>
+        </Card.Text>
+      </Card.Body>
+    </Card>
+  );
+}
+
+export default TaskCard;
