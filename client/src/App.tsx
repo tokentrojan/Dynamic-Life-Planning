@@ -5,9 +5,26 @@ import Login from './pages/Login';
 import Planner from './pages/Planner';
 import SortedTasks from './pages/SortedTasks';
 import UnsortedTasks from './pages/UnsortedTasks';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
+
 
 function App() {
-  const isAuthenticated = true; // replace with Firebase auth logic
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setLoading(false);
+    });
+
+    return () => unsubscribe(); // cleanup listener on unmount
+  }, []);
+
+  if (loading) return <div>Loading...</div>; // prevent unused warning
+
 
   return (
     <Router>
