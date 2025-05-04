@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Navbar from './components/NavBar'
+import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 import Planner from './pages/Planner';
 import SortedTasks from './pages/SortedTasks';
@@ -35,6 +36,7 @@ function App() {
         <Route path="/sorted" element={isAuthenticated ? <SortedTasks /> : <Navigate to="/login" />} />
         <Route path="/unsorted" element={isAuthenticated ? <UnsortedTasks /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/planner" : "/login"} />} />
+        <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Router>
   );
