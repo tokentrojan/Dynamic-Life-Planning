@@ -40,6 +40,7 @@ const Login: React.FC = () => {
     }
   };
 
+
   return (
     <Container className="mt-5" style={{ maxWidth: 400 }}>
       <h2 className="mb-4">Login</h2>
@@ -75,7 +76,11 @@ const Login: React.FC = () => {
       <Button variant="outline-primary" onClick={handleGoogleLogin} className="w-100">
         Sign in with Google
       </Button>
-    </Container>
+    
+      <Button variant="outline-primary" onClick={() => navigate('/signup')} className="w-100">
+        Sign Up
+      </Button>
+      </Container>
   );
 };
 
