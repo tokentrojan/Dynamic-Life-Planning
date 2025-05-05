@@ -9,6 +9,7 @@ import UnsortedTasks from './pages/UnsortedTasks';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
+import { AuthProvider } from './AuthProvider';
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
 
 
   return (
+    <AuthProvider>
     <Router>
       {isAuthenticated && <Navbar />}
       <Routes>
@@ -39,6 +41,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 

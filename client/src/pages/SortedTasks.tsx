@@ -10,6 +10,7 @@ const tasks: Task[] = [
     dueDate: '2025-05-01T08:00:00',
     duration: 45,
     priority: 'high',
+    recurring: false,
   },
   {
     id: '2',
@@ -17,6 +18,7 @@ const tasks: Task[] = [
     dueDate: '2025-05-03T18:00:00',
     duration: 30,
     priority: 'low',
+    recurring: true,
   },
   {
     id: '3',
@@ -24,6 +26,7 @@ const tasks: Task[] = [
     dueDate: '2025-05-03T14:00:00',
     duration: 240,
     priority: 'medium',
+    recurring: true,
   },
 ];
 
