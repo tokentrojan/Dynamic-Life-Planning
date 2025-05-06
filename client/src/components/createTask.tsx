@@ -7,7 +7,7 @@ interface Props {
   onCreatTask: (task: Task) => void;
 }
 
-function CreatTask({ onCreatTask }: Props) {
+function CreateTask({ onCreatTask }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -64,6 +64,7 @@ function CreatTask({ onCreatTask }: Props) {
 
         <Form.Group className="mb-3">
           <Form.Control
+            as="textarea"
             type="text"
             placeholder="Description"
             value={description}
@@ -111,4 +112,4 @@ function CreatTask({ onCreatTask }: Props) {
   );
 }
 
-export default CreatTask;
+export default CreateTask;
