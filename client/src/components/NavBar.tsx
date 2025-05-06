@@ -1,8 +1,7 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase'; // adjust path if needed
-import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
 function AppNavbar() {
   const navigate = useNavigate();
@@ -15,16 +14,31 @@ function AppNavbar() {
       console.error('Error signing out:', error);
     }
   };
+
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar bg="light" expand="lg" style={{ backgroundColor: '#e0e0e0' }}>
       <Container>
         <Navbar.Brand href="/planner">Dynamic Life Planning</Navbar.Brand>
-        <Nav className="me-auto">
-          <NavLink className="nav-link" to="/planner">Planner</NavLink>
-          <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
-          <NavLink className="nav-link" to="/unsorted">Unsorted Tasks</NavLink>
-          <button onClick={handleLogout} className="btn btn-link nav-link" style={{ padding: 0 }}>Logout </button>
-        </Nav>
+
+        <Navbar.Toggle aria-controls="navbar-nav" />
+        <Navbar.Collapse id="navbar-nav">
+          <Nav className="me-auto">
+            <NavLink className="nav-link" to="/planner">Planner</NavLink>
+            <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
+            <NavLink className="nav-link" to="/unsorted">Unsorted Tasks</NavLink>
+            <NavLink className="nav-link" to="/create">Create Task</NavLink>
+          </Nav>
+
+          <Nav>
+            <button
+              onClick={handleLogout}
+              className="btn btn-link nav-link"
+              style={{ padding: 0 }}
+            >
+              Logout
+            </button>
+          </Nav>
+        </Navbar.Collapse>
       </Container>
     </Navbar>
   );
