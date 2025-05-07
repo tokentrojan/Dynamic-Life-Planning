@@ -6,10 +6,11 @@ import { doc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../AuthContext';                   // porvides current User
 import { v4 as uuid } from 'uuid';                          // generates unique taskID for each task
 
-function CreateTask() {
-  const { currentUser } = useAuth();
-  const navigate = useNavigate();
+function CreateTask() {                                           
+  const { currentUser } = useAuth();    //gets current User
+  const navigate = useNavigate();       //for redirection 
 
+  /**Form State variables for user input**/
   const [taskName, setTaskName] = useState('');
   const [taskDescription, setTaskDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
@@ -20,7 +21,7 @@ function CreateTask() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
-    e.preventDefault();
+    e.preventDefault();           
     if (!currentUser) return;
 
     const taskID = uuid();
