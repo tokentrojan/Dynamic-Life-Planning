@@ -1,28 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
-import { useAuth } from '../AuthContext';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 import { Task } from '../types/Task';
+import { useAuth } from '../AuthContext';
 
-function TaskList() {
+export function useTasks(): Task[] {
+    const [tasks, setTasks] = useState<Task[]>([]);
     const { currentUser } = useAuth();
 
     useEffect(() => {
         if (!currentUser) return;
 
-        const q = query(
-            collection(db, 'users', currentUser.uid, 'tasks')
-        );
+        const q = query(collection(db, 'users', currentUser.uid, 'tasks'));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const tasksData: Task[] = [];
             querySnapshot.forEach((doc) => {
-                tasksData.push({ taskID: doc.id, ...(doc.data() as Omit<Task, 'taskID'>) });
+                tasksData.push({
+                    taskID: doc.id,
+                    ...(doc.data() as Omit<Task, 'taskID'>),
+                });
             });
+            setTasks(tasksData);
         });
 
-        return () => unsubscribe(); // cleanup listener
+        return () => unsubscribe();
     }, [currentUser]);
-}
 
-export default TaskList;
+    return tasks;
+}
