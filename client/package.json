@@ -12,12 +12,13 @@
   "dependencies": {
     "bootstrap": "^5.3.5",
     "date-fns": "^4.1.0",
-    "firebase": "^11.6.1",
+    "firebase": "^11.7.0",
     "react": "^19.0.0",
     "react-big-calendar": "^1.18.0",
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.5.3"
+    "react-router-dom": "^7.5.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
