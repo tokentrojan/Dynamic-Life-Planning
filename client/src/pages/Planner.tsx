@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, Views, View } from 'react-big-calendar'; //added View import to try and fix bug
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enAU } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -16,7 +16,7 @@ const localizer = dateFnsLocalizer({
   locales: { 'en-AU': enAU },
 });
 
-// Calendar display format
+// Calendar display format, this is the simplified version for calendar view.
 type TaskEvent = {
   id: string;
   title: string;
@@ -40,17 +40,22 @@ const Planner = () => {
     });
 
   const [events] = useState<TaskEvent[]>(convertTasksToEvents(sampleTasks));
+  const [view, setView] = useState<View>(Views.WEEK); //removed from calendar and added as const to fix the bug.
+  const [date, setDate] = useState(new Date()); // added to fix buttons not working due to current date and state handling errors
 
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Planner View</h2>
       <Calendar
         localizer={localizer}
-        events={events}
+        events={events} //controls current visible date
+        date = {date}   // updates when user clicks "Today", "Back" or "Next"
+        onNavigate={setDate}
         startAccessor="start"
         endAccessor="end"
         views={[Views.DAY, Views.WEEK, Views.MONTH]}
-        defaultView={Views.WEEK}
+        view={view}       // control view state
+        onView={setView}  //update when changed
         style={{ height: 600 }}
       />
     </Container>
