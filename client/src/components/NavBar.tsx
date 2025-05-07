@@ -18,7 +18,14 @@ function AppNavbar() {
   return (
     <Navbar bg="light" expand="lg" style={{ backgroundColor: '#e0e0e0' }}>
       <Container>
-        <Navbar.Brand href="/planner">Dynamic Life Planning</Navbar.Brand>
+      <Navbar.Brand href="/planner">
+        <img
+          src="/dlp.png"
+          alt="App Logo"
+          height="30"
+          className="d-inline-block align-top"
+        />
+      </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
