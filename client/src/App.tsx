@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Planner from './pages/Planner';
 import SortedTasks from './pages/SortedTasks';
 import UnsortedTasks from './pages/UnsortedTasks';
+import CreateTask from './pages/CreateTask';
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
@@ -37,6 +38,7 @@ function App() {
         <Route path="/planner" element={isAuthenticated ? <Planner /> : <Navigate to="/login" />} />
         <Route path="/sorted" element={isAuthenticated ? <SortedTasks /> : <Navigate to="/login" />} />
         <Route path="/unsorted" element={isAuthenticated ? <UnsortedTasks /> : <Navigate to="/login" />} />
+        <Route path="/create" element={isAuthenticated ? <CreateTask /> : <Navigate to="/login"/>} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/planner" : "/login"} />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
