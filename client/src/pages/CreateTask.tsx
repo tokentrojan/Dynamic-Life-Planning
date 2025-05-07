@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Form, Button, Container } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import { db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
-import { useAuth } from '../AuthContext';
-import { v4 as uuid } from 'uuid';
+import { useState } from 'react';                           // for managing form input state
+import { Form, Button, Container } from 'react-bootstrap';  // UI components
+import { useNavigate } from 'react-router-dom';             // routes for navigation redirects
+import { db } from '../firebase';                           // firebase firestore tools for saving data
+import { doc, setDoc } from 'firebase/firestore'; 
+import { useAuth } from '../AuthContext';                   // porvides current User
+import { v4 as uuid } from 'uuid';                          // generates unique taskID for each task
 
 function CreateTask() {
   const { currentUser } = useAuth();

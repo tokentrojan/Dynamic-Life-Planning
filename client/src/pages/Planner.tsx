@@ -48,9 +48,9 @@ const Planner = () => {
       <h2 className="mb-3">Planner View</h2>
       <Calendar
         localizer={localizer}
-        events={events} //controls current visible date
-        date = {date}   // updates when user clicks "Today", "Back" or "Next"
-        onNavigate={setDate}
+        events={events} 
+        date = {date}         //controls current visible date
+        onNavigate={setDate}  // updates when user clicks "Today", "Back" or "Next"
         startAccessor="start"
         endAccessor="end"
         views={[Views.DAY, Views.WEEK, Views.MONTH]}
