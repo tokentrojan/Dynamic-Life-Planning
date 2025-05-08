@@ -7,7 +7,9 @@ import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
 
 function CreateTask() {
-  const { currentUser } = useAuth(); //gets current User
+  const { currentUser } = useAuth();
+  const userID = currentUser?.uid || localStorage.getItem("cachedUID");
+
   const navigate = useNavigate(); //for redirection
 
   /**Form State variables for user input**/
@@ -19,15 +21,17 @@ function CreateTask() {
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
 
+  const [showForm, setshowForm] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
     e.preventDefault();
-    if (!currentUser) return;
+    if (!userID) return;
 
     const taskID = uuid();
 
     const newTask = {
-      userID: currentUser.uid,
+      userID,
       taskID,
       taskName,
       taskDescription,
@@ -37,7 +41,7 @@ function CreateTask() {
       ...(recurring && { recurring: true, recurringDay }),
     };
 
-    const taskRef = doc(db, "users", currentUser.uid, "tasks", taskID);
+    const taskRef = doc(db, "users", userID, "tasks", taskID);
     await setDoc(taskRef, newTask);
 
     navigate("/sorted"); // Redirect after creation
@@ -127,10 +131,6 @@ function CreateTask() {
             </Form.Select>
           </Form.Group>
         )}
-
-        <Button variant="primary" type="submit">
-          Create Task
-        </Button>
       </Form>
     </Container>
   );
