@@ -1,44 +1,44 @@
-import { Container, DropdownButton, Dropdown } from 'react-bootstrap';
-import { useState } from 'react';
+import { Container } from 'react-bootstrap';
+import { Task } from '../types/Task';
 import TaskCard from '../components/TaskCard';
-import { useTasks } from '../data/firebasetasks'; 
+//import { sampleTasks } from '../data/sampleTasks';
+import { db } from '../firebase';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { useAuth } from '../AuthContext';
+import { useEffect, useState } from 'react';
+
 
 const SortedTasks = () => {
-  // Get tasks using the useTasks hook
-  const tasks = useTasks(); // This will return an array of tasks from Firestore
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { currentUser } = useAuth();
 
-  // State for sorting option (dueDate or priority)
-  const [sortOption, setSortOption] = useState<'dueDate' | 'priority'>('dueDate');
+  useEffect(() => {
+    if (!currentUser) return;
 
-  // Function to handle sorting based on the selected option
+    const q = query(collection(db, 'users', currentUser.uid, 'tasks'));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const taskList: Task[] = [];
+      querySnapshot.forEach((doc) => {
+        taskList.push({ taskID: doc.id, ...(doc.data() as Omit<Task, 'taskID'>) });
+      });
+      setTasks(taskList);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
   const sortedTasks = [...tasks].sort((a, b) => {
-    if (sortOption === 'priority') {
-      // Sort by priority
-      const priorityOrder = { high: 1, medium: 2, low: 3 };
-      const pA = priorityOrder[a.priority ?? 'low'];
-      const pB = priorityOrder[b.priority ?? 'low'];
-      return pA - pB;
-    }
-
-    // Default: Sort by due date
+    const priorityOrder = { high: 1, medium: 2, low: 3 };
+    const pA = priorityOrder[a.priority ?? 'low'];
+    const pB = priorityOrder[b.priority ?? 'low'];
+    if (pA !== pB) return pA - pB;
     return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
   });
 
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Sorted Tasks</h2>
-
-      {/* Dropdown to select sort option */}
-      <DropdownButton
-        id="sortDropdown"
-        title={`Sort by: ${sortOption === 'dueDate' ? 'Due Date' : 'Priority'}`}
-        onSelect={(selected) => setSortOption(selected as 'dueDate' | 'priority')}
-        className="mb-3">
-        <Dropdown.Item eventKey="dueDate">Due Date</Dropdown.Item>
-        <Dropdown.Item eventKey="priority">Priority</Dropdown.Item>
-      </DropdownButton>
-
-      {/* Render the sorted tasks */}
       {sortedTasks.map((task) => (
         <TaskCard key={task.taskID} task={task} />
       ))}

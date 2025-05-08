@@ -6,7 +6,6 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
 import { useTasks } from '../data/firebasetasks';
 
-
 // Setup for date-fns
 const localizer = dateFnsLocalizer({
   format,
