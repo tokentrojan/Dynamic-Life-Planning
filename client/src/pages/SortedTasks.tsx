@@ -1,17 +1,19 @@
 import { Container, Form } from 'react-bootstrap';
 import { Task } from '../types/Task';
 import TaskCard from '../components/TaskCard';
-//import { sampleTasks } from '../data/sampleTasks';
 import { db } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { useAuth } from '../AuthContext';
 import { useEffect, useState } from 'react';
+import TaskModal from '../components/TaskModal';
 
 
 const SortedTasks = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [sortMethod, setSortMethod] = useState<'priority' | 'dueDate'>('priority');
   const { currentUser } = useAuth();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
 
   useEffect(() => {
     if (!currentUser) return;
@@ -40,7 +42,12 @@ const SortedTasks = () => {
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     }
   });
-
+  const handleEventClick = (event: Task) => { // Click handler
+    const clickedTask = tasks.find((task) => task.taskID === event.taskID);
+    if (clickedTask) {
+      setSelectedTask(clickedTask);
+    }
+  };
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Sorted Tasks</h2>
@@ -56,8 +63,16 @@ const SortedTasks = () => {
       </Form.Group>
 
       {sortedTasks.map((task) => (
-        <TaskCard key={task.taskID} task={task} />
+        <TaskCard key={task.taskID} task={task} onEdit={() => handleEventClick(task)} />
       ))}
+
+      {selectedTask && (
+        <TaskModal
+          task={selectedTask}
+          show={true}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </Container>
   );
 };
