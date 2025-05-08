@@ -2,10 +2,11 @@ import { Container, Form } from 'react-bootstrap';
 import { Task } from '../types/Task';
 import TaskCard from '../components/TaskCard';
 import { db } from '../firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, updateDoc, doc } from 'firebase/firestore';
 import { useAuth } from '../AuthContext';
 import { useEffect, useState } from 'react';
 import TaskModal from '../components/TaskModal';
+
 
 
 const SortedTasks = () => {
@@ -22,9 +23,30 @@ const SortedTasks = () => {
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const taskList: Task[] = [];
-      querySnapshot.forEach((doc) => {
-        taskList.push({ taskID: doc.id, ...(doc.data() as Omit<Task, 'taskID'>) });
+      const today = new Date().toLocaleDateString('en-GB', { weekday: 'long' });
+      querySnapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data() as Omit<Task, 'taskID'>;
+        const taskID = docSnapshot.id;
+
+        const isRecurring = data.recurring && data.recurringDay;
+        const isToday = data.recurringDay === today;
+
+        // If it's a completed recurring task and today is the recurring day, reset it
+        if (isRecurring && isToday && data.completed) {
+          const ref = doc(db, 'users', currentUser.uid, 'tasks', taskID);
+          updateDoc(ref, { completed: false });
+          data.completed = false;
+        }
+
+        // Push only tasks that are not completed, or that are recurring and it's time to show again
+        const shouldDisplay =
+          !data.completed || (isRecurring && isToday);
+
+        if (shouldDisplay) {
+          taskList.push({ taskID, ...data });
+        }
       });
+
       setTasks(taskList);
     });
 
@@ -48,6 +70,12 @@ const SortedTasks = () => {
       setSelectedTask(clickedTask);
     }
   };
+  
+const handleToggleComplete = async (taskID: string, completed: boolean) => {
+  if (!currentUser) return;
+  const taskRef = doc(db, 'users', currentUser.uid, 'tasks', taskID);
+  await updateDoc(taskRef, { completed });
+};
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Sorted Tasks</h2>
@@ -63,7 +91,7 @@ const SortedTasks = () => {
       </Form.Group>
 
       {sortedTasks.map((task) => (
-        <TaskCard key={task.taskID} task={task} onEdit={() => handleEventClick(task)} />
+        <TaskCard key={task.taskID} task={task} onEdit={() => handleEventClick(task)} onToggleComplete={handleToggleComplete}/>
       ))}
 
       {selectedTask && (

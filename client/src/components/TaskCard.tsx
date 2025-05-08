@@ -1,12 +1,13 @@
-import { Card, Badge, Button } from 'react-bootstrap';
+import { Card, Badge, Button, Form } from 'react-bootstrap';
 import { Task } from '../types/Task';
 
 interface Props {
   task: Task;
   onEdit?: () => void;
+  onToggleComplete: (taskID: string, completed: boolean) => void;
 }
 
-function TaskCard({ task, onEdit }: Props) {
+function TaskCard({ task, onEdit, onToggleComplete }: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case 'high': return 'danger';
@@ -50,10 +51,16 @@ function TaskCard({ task, onEdit }: Props) {
           {task.completed && isPastDue && (
             <Badge bg="secondary" className="ms-2">Completed</Badge>
           )}
+          <Form.Check
+            type="checkbox"
+            label="Completed"
+            checked={task.completed}
+            onChange={(e) => onToggleComplete(task.taskID, e.target.checked)}
+            className="mt-2"
+          />
         </Card.Text>
-                {/* Only show edit button if onEdit was passed in */}
-                {onEdit && (
-          <Button variant="outline-primary" size="sm" onClick={onEdit}>
+        { }{onEdit && (
+          <Button variant="primary" size="sm" onClick={onEdit}>
             Edit
           </Button>
         )}
