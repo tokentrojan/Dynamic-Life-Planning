@@ -65,6 +65,8 @@ const Planner = () => {
         view={view}       // control view state
         onView={setView}  //update when changed
         style={{ height: 600 }}
+        min={new Date(1970, 1, 1, 5, 0, 0)}   // Start at 5 AM
+        max={new Date(1970, 1, 2, 1, 0, 0)}   // End at 1 AM (next day)
         onSelectEvent={handleEventClick}
       />
       {selectedTask && ( // Show modal
