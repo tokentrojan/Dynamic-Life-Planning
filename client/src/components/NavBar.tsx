@@ -34,6 +34,7 @@ function AppNavbar() {
             <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
             <NavLink className="nav-link" to="/unsorted">Unsorted Tasks</NavLink>
             <NavLink className="nav-link" to="/create">Create Task</NavLink>
+            <NavLink className="nav-link" to="/completed">Completed Tasks</NavLink>
           </Nav>
 
           <Nav>
