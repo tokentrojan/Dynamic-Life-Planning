@@ -4,7 +4,9 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enAU } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
+import TaskModal from '../components/TaskModal';
 import { useTasks } from '../data/firebasetasks';
+import { Task } from '../types/Task';
 
 // Setup for date-fns
 const localizer = dateFnsLocalizer({
@@ -28,6 +30,7 @@ const Planner = () => {
   const tasks = useTasks(); 
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState(new Date());
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const events: TaskEvent[] = tasks.map((task) => {
     const start = new Date(task.dueDate);
@@ -40,6 +43,13 @@ const Planner = () => {
       priority: task.priority,
     };
   });
+
+  const handleEventClick = (event: TaskEvent) => { // Click handler
+    const clickedTask = tasks.find((task) => task.taskID === event.id);
+    if (clickedTask) {
+      setSelectedTask(clickedTask);
+    }
+  };
 
   return (
     <Container className="mt-4">
@@ -55,7 +65,15 @@ const Planner = () => {
         view={view}       // control view state
         onView={setView}  //update when changed
         style={{ height: 600 }}
+        onSelectEvent={handleEventClick}
       />
+      {selectedTask && ( // Show modal
+        <TaskModal
+          task={selectedTask}
+          show={true}
+          onClose={() => setSelectedTask(null)} // Clear modal state
+        />
+      )}
     </Container>
   );
 };
