@@ -4,8 +4,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enAU } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
-import { sampleTasks } from '../data/sampleTasks';
-import { Task } from '../types/Task';
+import { useTasks } from '../data/firebasetasks';
 
 // Setup for date-fns
 const localizer = dateFnsLocalizer({
@@ -26,22 +25,21 @@ type TaskEvent = {
 };
 
 const Planner = () => {
-  const convertTasksToEvents = (tasks: Task[]): TaskEvent[] =>
-    tasks.map((task) => {
-      const start = new Date(task.dueDate);
-      const end = new Date(start.getTime() + (task.duration ?? 30) * 60000);
-      return {
-        id: task.taskID,
-        title: task.taskName,
-        start,
-        end,
-        priority: task.priority,
-      };
-    });
+  const tasks = useTasks(); 
+  const [view, setView] = useState<View>(Views.WEEK);
+  const [date, setDate] = useState(new Date());
 
-  const [events] = useState<TaskEvent[]>(convertTasksToEvents(sampleTasks));
-  const [view, setView] = useState<View>(Views.WEEK); //removed from calendar and added as const to fix the bug.
-  const [date, setDate] = useState(new Date()); // added to fix buttons not working due to current date and state handling errors
+  const events: TaskEvent[] = tasks.map((task) => {
+    const start = new Date(task.dueDate);
+    const end = new Date(start.getTime() + (task.duration ?? 30) * 60000);
+    return {
+      id: task.taskID,
+      title: task.taskName,
+      start,
+      end,
+      priority: task.priority,
+    };
+  });
 
   return (
     <Container className="mt-4">

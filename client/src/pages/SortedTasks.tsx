@@ -63,4 +63,3 @@ const SortedTasks = () => {
 };
 
 export default SortedTasks;
-

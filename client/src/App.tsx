@@ -26,7 +26,7 @@ function App() {
     return () => unsubscribe(); // cleanup listener on unmount
   }, []);
 
-  if (loading) return <div>Loading...</div>; // prevent unused warning
+  if (loading) return <div>Loading...</div>; //return for while the site is loading
 
 
   return (
