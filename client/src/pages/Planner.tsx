@@ -6,6 +6,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
 import { useTasks } from '../data/firebasetasks';
 
+
 // Setup for date-fns
 const localizer = dateFnsLocalizer({
   format,
@@ -25,7 +26,7 @@ type TaskEvent = {
 };
 
 const Planner = () => {
-  const tasks = useTasks(); // ✅ call the hook at the top level
+  const tasks = useTasks(); 
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState(new Date());
 

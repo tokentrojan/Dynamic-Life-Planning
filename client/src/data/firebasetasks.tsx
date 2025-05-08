@@ -15,12 +15,23 @@ export function useTasks(): Task[] {
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const tasksData: Task[] = [];
+
             querySnapshot.forEach((doc) => {
-                tasksData.push({
-                    taskID: doc.id,
-                    ...(doc.data() as Omit<Task, 'taskID'>),
-                });
+                const rawData = doc.data();
+                const task = { taskID: doc.id, ...(rawData as Omit<Task, 'taskID'>) };
+
+                //  Recurring task logic
+
+                const showTaskHelper = (task: Task, currentDate: Date): boolean => {
+                    const today = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
+                    if (task.recurring === false) return true; //return task if it is not recurring
+                    if (task.completed) {
+                        return today === task.recurringDay;//task is completed, but it is recurring today
+                    }
+                    return true;
+                }
             });
+
             setTasks(tasksData);
         });
 
