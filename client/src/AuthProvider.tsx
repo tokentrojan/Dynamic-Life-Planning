@@ -9,6 +9,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+
+      if (user) {
+        localStorage.setItem("cachedUID", user.uid); // ✅ Cache UID for offline use
+      }else {
+        localStorage.removeItem("cachedUID");
+      }
     });
 
     return () => unsubscribe();
