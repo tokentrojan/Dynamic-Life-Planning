@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import { AuthProvider } from './AuthProvider';
+import Completed from './pages/completed';
 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
     return () => unsubscribe(); // cleanup listener on unmount
   }, []);
 
-  if (loading) return <div>Loading...</div>; // prevent unused warning
+  if (loading) return <div>Loading...</div>; //return for while the site is loading
 
 
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/create" element={isAuthenticated ? <CreateTask /> : <Navigate to="/login"/>} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/planner" : "/login"} />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/completed" element={isAuthenticated? <Completed /> :<Navigate to="/login"/>}/>
       </Routes>
     </Router>
     </AuthProvider>

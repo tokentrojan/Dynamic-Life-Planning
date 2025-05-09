@@ -4,7 +4,8 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enAU } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Container } from 'react-bootstrap';
-import { sampleTasks } from '../data/sampleTasks';
+import TaskModal from '../components/TaskModal';
+import { useTasks } from '../data/firebasetasks';
 import { Task } from '../types/Task';
 
 // Setup for date-fns
@@ -26,22 +27,29 @@ type TaskEvent = {
 };
 
 const Planner = () => {
-  const convertTasksToEvents = (tasks: Task[]): TaskEvent[] =>
-    tasks.map((task) => {
-      const start = new Date(task.dueDate);
-      const end = new Date(start.getTime() + (task.duration ?? 30) * 60000);
-      return {
-        id: task.taskID,
-        title: task.taskName,
-        start,
-        end,
-        priority: task.priority,
-      };
-    });
+  const tasks = useTasks(); 
+  const [view, setView] = useState<View>(Views.WEEK);
+  const [date, setDate] = useState(new Date());
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  const [events] = useState<TaskEvent[]>(convertTasksToEvents(sampleTasks));
-  const [view, setView] = useState<View>(Views.WEEK); //removed from calendar and added as const to fix the bug.
-  const [date, setDate] = useState(new Date()); // added to fix buttons not working due to current date and state handling errors
+  const events: TaskEvent[] = tasks.map((task) => {
+    const start = new Date(task.dueDate);
+    const end = new Date(start.getTime() + (task.duration ?? 30) * 60000);
+    return {
+      id: task.taskID,
+      title: task.taskName,
+      start,
+      end,
+      priority: task.priority,
+    };
+  });
+
+  const handleEventClick = (event: TaskEvent) => { // Click handler
+    const clickedTask = tasks.find((task) => task.taskID === event.id);
+    if (clickedTask) {
+      setSelectedTask(clickedTask);
+    }
+  };
 
   return (
     <Container className="mt-4">
@@ -57,7 +65,15 @@ const Planner = () => {
         view={view}       // control view state
         onView={setView}  //update when changed
         style={{ height: 600 }}
+        onSelectEvent={handleEventClick}
       />
+      {selectedTask && ( // Show modal
+        <TaskModal
+          task={selectedTask}
+          show={true}
+          onClose={() => setSelectedTask(null)} // Clear modal state
+        />
+      )}
     </Container>
   );
 };

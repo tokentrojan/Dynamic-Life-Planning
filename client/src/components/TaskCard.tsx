@@ -3,9 +3,11 @@ import { Task } from "../types/Task";
 
 interface Props {
   task: Task;
+  onEdit?: () => void;
+  onToggleComplete?: () => void;
 }
 
-function TaskCard({ task }: Props) {
+function TaskCard({ task, onEdit, onToggleComplete }: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -31,7 +33,8 @@ function TaskCard({ task }: Props) {
     return `${day}/${month}/${year} ${time}`;
   };
 
-  const isPastDue = new Date(task.dueDate) < new Date();
+  // const isPastDue = new Date(task.dueDate) < new Date();
+  const isCompleted = task.completed;
 
   return (
     <Card className="mb-3 shadow-sm">
@@ -64,6 +67,19 @@ function TaskCard({ task }: Props) {
             </Badge>
           )}
         </Card.Text>
+        <Form.Check
+          type="checkbox"
+          label="Completed"
+          checked={task.completed}
+          onChange={onToggleComplete}
+          className="ms-3"
+        />
+        {/* Only show edit button if onEdit was passed in */}
+        {onEdit && (
+          <Button variant="primary" size="sm" onClick={onEdit}>
+            Edit
+          </Button>
+        )}
       </Card.Body>
     </Card>
   );

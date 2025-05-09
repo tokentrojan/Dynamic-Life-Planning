@@ -33,6 +33,7 @@ function CreateTask() {
       taskName,
       taskDescription,
       dueDate,
+      completed: false,
       ...(priority && { priority }),
       ...(duration && { duration: Number(duration) }),
       ...(recurring && { recurring: true, recurringDay }),
