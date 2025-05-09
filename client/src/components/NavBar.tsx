@@ -18,14 +18,14 @@ function AppNavbar() {
   return (
     <Navbar bg="light" expand="lg" style={{ backgroundColor: '#e0e0e0' }}>
       <Container>
-      <Navbar.Brand href="/planner">
-        <img
-          src="/dlp.png"
-          alt="App Logo"
-          height="30"
-          className="d-inline-block align-top"
-        />
-      </Navbar.Brand>
+        <Navbar.Brand href="/planner">
+          <img
+            src="/dlp.png"
+            alt="App Logo"
+            height="30"
+            className="d-inline-block align-top"
+          />
+        </Navbar.Brand>
 
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
@@ -33,7 +33,9 @@ function AppNavbar() {
             <NavLink className="nav-link" to="/planner">Planner</NavLink>
             <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
             <NavLink className="nav-link" to="/unsorted">Unsorted Tasks</NavLink>
+            <NavLink className="nav-link" to="/completed">Completed Tasks</NavLink>
             <NavLink className="nav-link" to="/create">Create Task</NavLink>
+
           </Nav>
 
           <Nav>

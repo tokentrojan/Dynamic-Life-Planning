@@ -11,7 +11,7 @@ const SortedTasks = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null); // new
 
   const sortedTasks = tasks
-    .filter(task => !!task.priority)
+    .filter(task => !!task.priority && !task.completed)
     .sort((a, b) => {
       if (sortMethod === 'priority') {
         const order = { high: 1, medium: 2, low: 3 };
@@ -40,7 +40,7 @@ const SortedTasks = () => {
       ) : (
         sortedTasks.map((task) => (
           <div key={task.taskID} onClick={() => setSelectedTask(task)} style={{ cursor: 'pointer' }}>
-            <TaskCard task={task} />
+            <TaskCard task={task} onEdit={() => setSelectedTask(task)}></TaskCard>
           </div>
         ))
       )}

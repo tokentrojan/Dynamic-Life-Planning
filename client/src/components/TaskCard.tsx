@@ -1,12 +1,14 @@
-import { Card, Badge, Button } from 'react-bootstrap';
+//there is a problem in here where you can update the completed checkbox without editing the task, so nothing is sent through TaskModal to the db. Need to fix that
+import { Card, Badge, Button, Form } from 'react-bootstrap';
 import { Task } from '../types/Task';
 
 interface Props {
   task: Task;
   onEdit?: () => void;
+  onToggleComplete?: () => void;
 }
 
-function TaskCard({ task, onEdit }: Props) {
+function TaskCard({ task, onEdit, onToggleComplete }: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case 'high': return 'danger';
@@ -25,7 +27,8 @@ function TaskCard({ task, onEdit }: Props) {
     return `${day}/${month}/${year} ${time}`;
   };
 
-  const isPastDue = new Date(task.dueDate) < new Date();
+ // const isPastDue = new Date(task.dueDate) < new Date();
+  const isCompleted = task.completed;
 
   return (
     <Card className="mb-3 shadow-sm">
@@ -47,13 +50,20 @@ function TaskCard({ task, onEdit }: Props) {
           {task.recurring && task.recurringDay && (
             <Badge bg="info">Repeats: {task.recurringDay}</Badge>
           )}
-          {task.completed && isPastDue && (
+          {isCompleted && (
             <Badge bg="secondary" className="ms-2">Completed</Badge>
           )}
         </Card.Text>
-                {/* Only show edit button if onEdit was passed in */}
-                {onEdit && (
-          <Button variant="outline-primary" size="sm" onClick={onEdit}>
+        <Form.Check
+          type="checkbox"
+          label="Completed"
+          checked={task.completed}
+          onChange={onToggleComplete}
+          className="ms-3"
+        />
+        {/* Only show edit button if onEdit was passed in */}
+        {onEdit && (
+          <Button variant="primary" size="sm" onClick={onEdit}>
             Edit
           </Button>
         )}

@@ -21,6 +21,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [duration, setDuration] = useState(task.duration ?? '');
   const [recurring, setRecurring] = useState(task.recurring ?? false);
   const [recurringDay, setRecurringDay] = useState(task.recurringDay ?? '');
+  const [completed, setCompleted] = useState(task.completed ?? false);
 
   // ✅ NEW: resync state if task changes
   useEffect(() => {
@@ -31,6 +32,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     setDuration(task.duration ?? '');
     setRecurring(task.recurring ?? false);
     setRecurringDay(task.recurringDay ?? '');
+    setCompleted(task.completed ?? false);
   }, [task]);
 
   const handleSave = async () => {
@@ -43,6 +45,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       duration,
       recurring,
       recurringDay,
+      completed,
     });
     setIsEditing(false);
     onClose();
@@ -131,6 +134,14 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
                 onChange={(e) => setDuration(Number(e.target.value))}
               />
             </Form.Group>
+
+            <Form.Check
+              type="checkbox"
+              label="Completed"
+              checked={completed}
+              onChange={(e) => setCompleted(e.target.checked)}
+              className="mt-3"
+            />
 
             <Form.Check
               type="checkbox"
