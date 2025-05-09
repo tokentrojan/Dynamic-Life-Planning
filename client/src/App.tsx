@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase';
 import { AuthProvider } from './AuthProvider';
+import Completed from './pages/completed';
 
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/create" element={isAuthenticated ? <CreateTask /> : <Navigate to="/login"/>} />
         <Route path="*" element={<Navigate to={isAuthenticated ? "/planner" : "/login"} />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/completed" element={isAuthenticated? <Completed /> :<Navigate to="/login"/>}/>
       </Routes>
     </Router>
     </AuthProvider>
