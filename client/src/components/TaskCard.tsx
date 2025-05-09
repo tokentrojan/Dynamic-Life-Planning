@@ -1,3 +1,4 @@
+//there is a problem in here where you can update the completed checkbox without editing the task, so nothing is sent through TaskModal to the db. Need to fix that
 import { Card, Badge, Button, Form } from 'react-bootstrap';
 import { Task } from '../types/Task';
 
