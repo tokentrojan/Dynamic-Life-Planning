@@ -5,8 +5,8 @@ import { Task } from '../types/Task';
 import { useAuth } from '../AuthContext';
 
 export function useTasks(): Task[] {
-    const [tasks, setTasks] = useState<Task[]>([]);
-    const { currentUser } = useAuth();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     if (!currentUser) return;
@@ -30,20 +30,15 @@ export function useTasks(): Task[] {
           data.completed = false;
         }
 
-        // Push only tasks that are not completed, or that are recurring and it's time to show again
-        const shouldDisplay =
-          !data.completed || (isRecurring && isToday);
-
-        if (shouldDisplay) {
-          taskList.push({ taskID, ...data });
-        }
+        // Push all tasks in the list, filter them in UI
+        taskList.push({ taskID, ...data });
       });
 
       setTasks(taskList);
     });
 
-        return () => unsubscribe();
-    }, [currentUser]);
+    return () => unsubscribe();
+  }, [currentUser]);
 
-    return tasks;
+  return tasks;
 }
