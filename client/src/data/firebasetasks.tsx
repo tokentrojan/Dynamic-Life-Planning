@@ -16,6 +16,7 @@ export function useTasks(): Task[] {
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const taskList: Task[] = [];
       const today = new Date().toLocaleDateString('en-GB', { weekday: 'long' });
+
       querySnapshot.forEach((docSnapshot) => {
         const data = docSnapshot.data() as Omit<Task, 'taskID'>;
         const taskID = docSnapshot.id;
@@ -25,9 +26,20 @@ export function useTasks(): Task[] {
 
         // If it's a completed recurring task and today is the recurring day, reset it
         if (isRecurring && isToday && data.completed) {
+
+          const formatDueDate = (iso: string) => {
+            const date = new Date(iso);
+            return date.toLocaleString(undefined, {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            });
+          };
+          const nowISO = new Date().toISOString();
+          const formattedDate = formatDueDate(nowISO);
           const ref = doc(db, 'users', currentUser.uid, 'tasks', taskID);
-          updateDoc(ref, { completed: false });
+          updateDoc(ref, { completed: false, dueDate: formattedDate });
           data.completed = false;
+          data.dueDate = formattedDate;
         }
 
         // Push all tasks in the list, filter them in UI
