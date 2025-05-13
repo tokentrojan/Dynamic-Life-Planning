@@ -9,7 +9,7 @@ function UnsortedTasks() {
   const tasks = useTasks();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Track clicked task
 
-  const unsortedTasks = tasks.filter(task => !task.priority); // Only tasks without priority
+  const unsortedTasks = tasks.filter(task => !task.priority && !task.completed); // Only tasks without priority and not completed
 
   return (
     <Container className="mt-4">
