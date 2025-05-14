@@ -1,5 +1,5 @@
 import { useState } from "react"; // for managing form input state
-import { Form, Button, Container } from "react-bootstrap"; // UI components
+import { Form, Button, Container, FormGroup, Row, Col } from "react-bootstrap"; // UI components
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
 import { doc, setDoc } from "firebase/firestore";
@@ -20,6 +20,17 @@ function CreateTask() {
   const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
+  const [colour, setColour] = useState("");
+  const [showColours, setShowColours] = useState(false);
+
+  const colours = [
+    { name: "Red", value: "red" },
+    { name: "Blue", value: "blue" },
+    { name: "Green", value: "green" },
+    { name: "Yellow", value: "yellow" },
+    { name: "Purple", value: "purple" },
+    { name: "Orange", value: "orange" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
@@ -36,6 +47,7 @@ function CreateTask() {
       dueDate,
       completed: false,
       ...(priority && { priority }),
+      ...(colour && { colour }),
       ...(duration && { duration: Number(duration) }),
       ...(recurring && { recurring: true, recurringDay }),
     };
@@ -47,7 +59,9 @@ function CreateTask() {
   };
 
   return (
-    <Container className="mt-4" style={{ maxWidth: 600 }}>
+    <Container className="mt-4" style={{ maxWidth: 800 }}>
+      {" "}
+      //
       <h2>Create New Task</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -63,47 +77,76 @@ function CreateTask() {
           <Form.Label>Task Description *</Form.Label>
           <Form.Control
             as="textarea"
-            rows={3}
+            rows={4}
             value={taskDescription}
             onChange={(e) => setTaskDescription(e.target.value)}
             required
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Due Date & Time *</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-          />
-        </Form.Group>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Due Date & Time *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </Form.Group>
+          </Col>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Priority</Form.Label>
-          <Form.Select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="">-- None --</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </Form.Select>
-        </Form.Group>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Priority</Form.Label>
+              <Form.Select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="">-- None --</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Duration (minutes)</Form.Label>
-          <Form.Control
-            type="number"
-            value={duration}
-            onChange={(e) =>
-              setDuration(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            min={1}
-          />
-        </Form.Group>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Duration (minutes)</Form.Label>
+              <Form.Control
+                type="number"
+                value={duration}
+                onChange={(e) =>
+                  setDuration(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={1}
+              />
+            </Form.Group>
+          </Col>
+
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Task Category</Form.Label>
+              <Form.Select
+                value={colour}
+                onChange={(e) => setColour(e.target.value)}
+              >
+                <option value="">Select a colour</option>
+                {colours.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
         <Form.Check
           type="checkbox"
