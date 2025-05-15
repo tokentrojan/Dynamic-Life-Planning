@@ -28,8 +28,8 @@ function CreateTask() {
     { name: "Blue", value: "blue" },
     { name: "Green", value: "green" },
     { name: "Yellow", value: "yellow" },
-    { name: "Purple", value: "purple" },
-    { name: "Orange", value: "orange" },
+    { name: "Gray", value: "gray" },
+    { name: "Black", value: "black" },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -22,9 +22,24 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
     }
   };
 
-  const getTaskColor = (colour?: string) => {
-    const validColours = ["red", "blue", "green", "yellow", "purple", "orange"];
-    return validColours.includes(colour || "") ? colour : "gray";
+  const getTaskColour = (colour?: string) => {
+    switch (colour) {
+      case "blue":
+        return "primary";
+      case "red":
+        return "danger";
+      case "green":
+        return "success";
+      case "yellow":
+        return "warning";
+      case "black":
+        return "dark";
+      case "gary":
+        return "secondary";
+
+      default:
+        return "light";
+    }
   };
 
   const formatDueDate = (isoDate: string) => {
@@ -59,16 +74,23 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
               <br />
             </>
           )}
+
+          {task.colour && (
+            <>
+              Catgeory: <> </>
+              <Badge bg={getTaskColour(task.colour)} className="me-2">
+                {task.colour.toUpperCase() ?? "Non"}
+              </Badge>
+            </>
+          )}
+          <br />
           {task.priority && (
             <Badge bg={getBadgeColor(task.priority)} className="me-2">
               {task.priority.toUpperCase()}
             </Badge>
           )}
-          {task.colour && (
-            <Badge bg={getTaskColor(task.colour)} className="me-2">
-              {task.colour.toUpperCase()}{" "}
-            </Badge>
-          )}
+          <br />
+
           {task.recurring && task.recurringDay && (
             <Badge bg="info">Repeats: {task.recurringDay}</Badge>
           )}
