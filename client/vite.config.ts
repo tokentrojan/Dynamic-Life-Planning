@@ -20,6 +20,22 @@ export default defineConfig({
           }
         ]
 
+      },
+
+      workbox:{
+        runtimeCaching:[{
+          urlPattern: ({url}) =>{
+            return url.pathname.startsWith("/api");
+          },
+
+          handler: "NetworkFirst",
+          options: {
+            cacheName: "api-cache",
+            cacheableResponse: {
+              statuses: [0-200]
+            }
+          }
+         }]
       }
 
     })
