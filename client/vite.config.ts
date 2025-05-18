@@ -9,8 +9,11 @@ export default defineConfig({
     
     react(),
     VitePWA({
-      manifest: {
 
+      registerType: 'autoUpdate', // important for service worker updates
+      injectRegister: 'auto', 
+      manifest: {
+        display: "standalone",
         icons:[
           {
             src:"/dlp.png",
