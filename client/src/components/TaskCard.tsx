@@ -27,7 +27,7 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
     return `${day}/${month}/${year} ${time}`;
   };
 
- // const isPastDue = new Date(task.dueDate) < new Date();
+  // const isPastDue = new Date(task.dueDate) < new Date();
   const isCompleted = task.completed;
 
   return (
@@ -36,6 +36,9 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
         <Card.Title>{task.taskName}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">
           Due: {formatDueDate(task.dueDate)}
+        </Card.Subtitle>
+        <Card.Subtitle className="mb-2 text-muted">
+          Do: {formatDueDate(task.doDate ?? task.dueDate)}
         </Card.Subtitle>
 
         <Card.Text>
