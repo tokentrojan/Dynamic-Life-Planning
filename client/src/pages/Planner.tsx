@@ -7,6 +7,9 @@ import { Container } from 'react-bootstrap';
 import TaskModal from '../components/TaskModal';
 import { useTasks } from '../data/firebasetasks';
 import { Task } from '../types/Task';
+import CreateTaskButton from '../components/CreateTaskButton';
+import * as CreateTaskButtonModule from '../components/CreateTaskButton';
+console.log('CreateTaskButtonModule:', CreateTaskButtonModule);
 
 // Setup for date-fns
 const localizer = dateFnsLocalizer({
@@ -74,6 +77,7 @@ const Planner = () => {
           onClose={() => setSelectedTask(null)} // Clear modal state
         />
       )}
+      <CreateTaskButton />
     </Container>
   );
 };
