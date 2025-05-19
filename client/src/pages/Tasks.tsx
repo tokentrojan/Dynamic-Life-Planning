@@ -4,6 +4,7 @@ import { useTasks } from '../data/firebasetasks'; // Custom hook to load tasks f
 import TaskCard from '../components/TaskCard'; // Reusable card to show a task
 import TaskModal from '../components/TaskModal'; // Modal to view/edit a task
 import { Task } from '../types/Task'; // Task type definition
+import CreateTaskButton from '../components/CreateTaskButton';
 
 const Tasks = () => {
   // Load tasks from Firestore
@@ -122,6 +123,7 @@ const Tasks = () => {
           onClose={() => setSelectedTask(null)} // Close modal
         />
       )}
+      <CreateTaskButton />
     </Container>
   );
 };

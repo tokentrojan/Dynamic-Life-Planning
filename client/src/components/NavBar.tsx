@@ -33,7 +33,6 @@ function AppNavbar() {
           <Nav className="me-auto">
             <NavLink className="nav-link" to="/planner">Planner</NavLink>
             <NavLink className="nav-link" to="/tasks">Tasks</NavLink> {/* Combined Sorted, Unsorted, Completed and Create Task Pages all in to one Task Page */}
-            <NavLink className="nav-link" to="/create">CreateTask</NavLink> 
           </Nav>
             {/* Right-Side of NavBar */}
           <Nav className="ms-auto">
