@@ -1,11 +1,13 @@
 
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import TaskModal from './TaskModal';
 
 const CreateTaskButton = () => {
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
-  return (
+return (
+  <>
     <OverlayTrigger
       placement="left"
       overlay={<Tooltip id="tooltip-create">Create Task</Tooltip>}
@@ -13,7 +15,7 @@ const CreateTaskButton = () => {
       <Button
         variant="primary"
         title="Create Task"
-        onClick={() => navigate('/create')}
+        onClick={() =>  setShowModal(true)} // No more navigation
         style={{
           position: 'fixed',
           bottom: '20px',
@@ -34,6 +36,9 @@ const CreateTaskButton = () => {
         +
       </Button>
     </OverlayTrigger>
+    {/* No task passed = Create mode */}
+      <TaskModal show={showModal} onClose={() => setShowModal(false)} />
+    </>
   );
 };
 
