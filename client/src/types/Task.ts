@@ -15,3 +15,10 @@ export interface Task {
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
 }
+
+export interface Category {
+  
+  color: Colour;       // 'red', 'blue', etc.
+  label: string;       // 'Red', or renamed like 'Studying'
+  userID: string;
+}

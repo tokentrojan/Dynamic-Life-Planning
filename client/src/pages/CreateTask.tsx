@@ -1,10 +1,12 @@
-import { useState } from "react"; // for managing form input state
+import { useState, useEffect } from "react"; // for managing form input state
 import { Form, Button, Container, FormGroup, Row, Col } from "react-bootstrap"; // UI components
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
+import CategoryManager from "./CategoryManager";
+import { Category } from "../types/Task";
 
 function CreateTask() {
   const { currentUser } = useAuth();
@@ -16,22 +18,61 @@ function CreateTask() {
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [doDate, setDoDate] = useState("")
+  const [doDate, setDoDate] = useState("");
   const [priority, setPriority] = useState("");
   const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
   const [colour, setColour] = useState("");
-  const [showColours, setShowColours] = useState(false);
+  //const [showColours, setShowColours] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryColor, setSelectedCategoryColor] = useState("");
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
 
-  const colours = [
-    { name: "Red", value: "red" },
-    { name: "Blue", value: "blue" },
-    { name: "Green", value: "green" },
-    { name: "Yellow", value: "yellow" },
-    { name: "Gray", value: "gray" },
-    { name: "Black", value: "black" },
-  ];
+  useEffect(() => {
+    const ensureCategoriesExist = async () => {
+      if (!userID) return;
+
+      const categoryRef = collection(db, "users", userID, "categories");
+      const snapshot = await getDocs(categoryRef);
+
+      // If no categories exist yet, create the defaults
+      if (true) {
+        console.log(" it was added");
+        const defaultCategories = [
+          { id: "cat1", label: "Red", color: "red" },
+          { id: "cat2", label: "Blue", color: "blue" },
+          { id: "cat3", label: "Green", color: "green" },
+          { id: "cat4", label: "Yellow", color: "yellow" },
+          { id: "cat5", label: "Gray", color: "gray" },
+          { id: "cat6", label: "Black", color: "black" },
+          { id: "cat7", label: "Optional", color: "gray" },
+        ];
+
+        await Promise.all(
+          defaultCategories.map((cat) =>
+            setDoc(doc(db, "users", userID, "categories", cat.id), {
+              label: cat.label,
+              color: cat.color,
+              userID,
+            })
+          )
+        );
+      }
+
+      // Now fetch and set categories
+      const updatedSnapshot = await getDocs(categoryRef);
+      const userCategories = updatedSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Category[];
+
+      setCategories(userCategories);
+      setCategoriesLoaded(true);
+    };
+
+    ensureCategoriesExist();
+  }, [userID]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
@@ -46,7 +87,7 @@ function CreateTask() {
       taskName,
       taskDescription,
       dueDate,
-      ...(doDate&& {doDate}),
+      ...(doDate && { doDate }),
       completed: false,
       ...(priority && { priority }),
       ...(colour && { colour }),
@@ -99,14 +140,14 @@ function CreateTask() {
             </Form.Group>
           </Col>
 
-        <Form.Group className="mb-3">
-          <Form.Label>When are you doing this task?</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            value={doDate}
-            onChange={(e) => setDoDate(e.target.value)}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>When are you doing this task?</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              value={doDate}
+              onChange={(e) => setDoDate(e.target.value)}
+            />
+          </Form.Group>
 
           <Col md={6}>
             <Form.Group className="mb-3">
@@ -142,20 +183,18 @@ function CreateTask() {
           </Col>
 
           <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Task Category</Form.Label>
-              <Form.Select
-                value={colour}
-                onChange={(e) => setColour(e.target.value)}
-              >
-                <option value="">Select a colour</option>
-                {colours.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            <Form.Label>Task Category</Form.Label>
+            <Form.Select
+              value={colour}
+              onChange={(e) => setColour(e.target.value)}
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.color}>
+                  {cat.label}
+                </option>
+              ))}
+            </Form.Select>
           </Col>
         </Row>
 
@@ -185,6 +224,7 @@ function CreateTask() {
           </Form.Group>
         )}
 
+        <CategoryManager></CategoryManager>
         <Button variant="primary" type="submit">
           Create Task
         </Button>

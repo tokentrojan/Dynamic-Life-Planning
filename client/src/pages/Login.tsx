@@ -1,45 +1,43 @@
-import { Button, Container, Form, Alert } from 'react-bootstrap';
-import React, { useState , FormEvent} from 'react';
-import { auth, googleProvider } from '../firebase';
+import { Button, Container, Form, Alert } from "react-bootstrap";
+import React, { useState, FormEvent } from "react";
+import { auth, googleProvider } from "../firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import { useNavigate } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
   const navigate = useNavigate();
 
   const handleEmailLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/planner');
+      navigate("/planner");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unknown error occurred.');
+        setError("An unknown error occurred.");
       }
     }
   };
 
   const handleGoogleLogin = async () => {
-    setError('');
+    setError("");
     try {
       await signInWithPopup(auth, googleProvider);
-      navigate('/planner');
+      navigate("/planner");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('An unknown error occurred.');
+        setError("An unknown error occurred.");
       }
     }
   };
-
 
   return (
     <Container className="mt-5" style={{ maxWidth: 400 }}>
@@ -73,14 +71,22 @@ const Login: React.FC = () => {
         </Button>
       </Form>
 
-      <Button variant="outline-primary" onClick={handleGoogleLogin} className="w-100">
+      <Button
+        variant="outline-primary"
+        onClick={handleGoogleLogin}
+        className="w-100"
+      >
         Sign in with Google
       </Button>
-    
-      <Button variant="outline-primary" onClick={() => navigate('/signup')} className="w-100">
+
+      <Button
+        variant="outline-primary"
+        onClick={() => navigate("/signup")}
+        className="w-100"
+      >
         Sign Up
       </Button>
-      </Container>
+    </Container>
   );
 };
 
