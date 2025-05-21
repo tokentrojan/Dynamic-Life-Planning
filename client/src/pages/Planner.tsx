@@ -36,7 +36,7 @@ const Planner = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const events: TaskEvent[] = tasks.map((task) => {
-    const start = new Date(task.dueDate);
+    const start = new Date(task.doDate ?? task.dueDate);
     const end = new Date(start.getTime() + (task.duration ?? 30) * 60000);
     return {
       id: task.taskID,
