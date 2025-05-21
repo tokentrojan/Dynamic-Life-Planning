@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -29,23 +29,16 @@ function AppNavbar() {
 
         <Navbar.Toggle aria-controls="navbar-nav" />
         <Navbar.Collapse id="navbar-nav">
+          {/* Left-Side of the NavBar */}
           <Nav className="me-auto">
             <NavLink className="nav-link" to="/planner">Planner</NavLink>
-            <NavLink className="nav-link" to="/sorted">Sorted Tasks</NavLink>
-            <NavLink className="nav-link" to="/unsorted">Unsorted Tasks</NavLink>
-            <NavLink className="nav-link" to="/completed">Completed Tasks</NavLink>
-            <NavLink className="nav-link" to="/create">Create Task</NavLink>
-
+            <NavLink className="nav-link" to="/tasks">Tasks</NavLink> {/* Combined Sorted, Unsorted, Completed and Create Task Pages all in to one Task Page */}
           </Nav>
-
-          <Nav>
-            <button
-              onClick={handleLogout}
-              className="btn btn-link nav-link"
-              style={{ padding: 0 }}
-            >
-              Logout
-            </button>
+            {/* Right-Side of NavBar */}
+          <Nav className="ms-auto">
+            <NavDropdown title="Account" id="account-dropdown" align="end"> {/*made an acoount dropdown to hold logout and future options */}
+              <NavDropdown.Item onClick={handleLogout}>Logout</NavDropdown.Item>
+            </NavDropdown>
           </Nav>
         </Navbar.Collapse>
       </Container>

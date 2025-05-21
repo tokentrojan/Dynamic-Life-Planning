@@ -104,7 +104,6 @@ function CreateTask() {
   return (
     <Container className="mt-4" style={{ maxWidth: 800 }}>
       {" "}
-      //
       <h2>Create New Task</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
