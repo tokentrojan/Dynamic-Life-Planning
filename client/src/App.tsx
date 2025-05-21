@@ -9,14 +9,12 @@ import Navbar from "./components/NavBar";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Planner from "./pages/Planner";
-import SortedTasks from "./pages/SortedTasks";
-import UnsortedTasks from "./pages/UnsortedTasks";
-import CreateTask from "./pages/CreateTask";
+import Tasks from "./pages/Tasks"; // unified task view
+import CreateTask from "./pages/CreateTask"; // will be implemented in Tasks Page soon
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { AuthProvider } from "./AuthProvider";
-import Completed from "./pages/Completed";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
