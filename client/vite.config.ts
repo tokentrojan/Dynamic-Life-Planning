@@ -12,20 +12,27 @@ export default defineConfig({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'dlp.png'],
+
+      manifest: false,
      
       workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
         runtimeCaching: [
           {
-            urlPattern: ({ url }) => url.pathname.startsWith('/api'),
-            handler: 'NetworkFirst',
+            urlPattern: ({ request }) =>
+              request.destination === 'document' ||
+              request.destination === 'script' ||
+              request.destination === 'style' ||
+              request.destination === 'image',
+            handler: 'StaleWhileRevalidate',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'app-cache',
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       }
     })
     
