@@ -24,55 +24,6 @@ function CreateTask() {
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
   const [colour, setColour] = useState("");
-  //const [showColours, setShowColours] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryColor, setSelectedCategoryColor] = useState("");
-  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
-
-  useEffect(() => {
-    const ensureCategoriesExist = async () => {
-      if (!userID) return;
-
-      const categoryRef = collection(db, "users", userID, "categories");
-      const snapshot = await getDocs(categoryRef);
-
-      // If no categories exist yet, create the defaults
-      if (true) {
-        console.log(" it was added");
-        const defaultCategories = [
-          { id: "cat1", label: "Red", color: "red" },
-          { id: "cat2", label: "Blue", color: "blue" },
-          { id: "cat3", label: "Green", color: "green" },
-          { id: "cat4", label: "Yellow", color: "yellow" },
-          { id: "cat5", label: "Gray", color: "gray" },
-          { id: "cat6", label: "Black", color: "black" },
-          { id: "cat7", label: "Optional", color: "gray" },
-        ];
-
-        await Promise.all(
-          defaultCategories.map((cat) =>
-            setDoc(doc(db, "users", userID, "categories", cat.id), {
-              label: cat.label,
-              color: cat.color,
-              userID,
-            })
-          )
-        );
-      }
-
-      // Now fetch and set categories
-      const updatedSnapshot = await getDocs(categoryRef);
-      const userCategories = updatedSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Category[];
-
-      setCategories(userCategories);
-      setCategoriesLoaded(true);
-    };
-
-    ensureCategoriesExist();
-  }, [userID]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
@@ -179,21 +130,6 @@ function CreateTask() {
                 min={1}
               />
             </Form.Group>
-          </Col>
-
-          <Col md={6}>
-            <Form.Label>Task Category</Form.Label>
-            <Form.Select
-              value={colour}
-              onChange={(e) => setColour(e.target.value)}
-            >
-              <option value="">Select a category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.color}>
-                  {cat.label}
-                </option>
-              ))}
-            </Form.Select>
           </Col>
         </Row>
 
