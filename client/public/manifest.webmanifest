@@ -1,0 +1,25 @@
+{
+    "name": "Dynamic Life Planner",
+    "short_name": "DLP",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#ffffff",
+    "icons": [
+      {
+        "src": "/dlp.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "screenshots": [
+      {
+        "src": "/home.png",
+        "sizes": "1280x720",
+        "type": "image/png",
+        "form_factor": "wide"
+      }
+      
+    ]
+  }
+  

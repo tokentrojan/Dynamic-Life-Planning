@@ -9,39 +9,26 @@ export default defineConfig({
     
     react(),
     VitePWA({
-
-      registerType: 'autoUpdate', // important for service worker updates
-      injectRegister: 'auto', 
-      manifest: {
-        display: "standalone",
-        icons:[
+      registerType: 'autoUpdate',
+      injectRegister: 'auto',
+      includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'dlp.png'],
+     
+      workbox: {
+        runtimeCaching: [
           {
-            src:"/dlp.png",
-            sizes:"512x512",
-            type:"image/png",
-            purpose:"any maskable"
-          }
-        ]
-
-      },
-
-      workbox:{
-        runtimeCaching:[{
-          urlPattern: ({url}) =>{
-            return url.pathname.startsWith("/api");
-          },
-
-          handler: "NetworkFirst",
-          options: {
-            cacheName: "api-cache",
-            cacheableResponse: {
-              statuses: [0-200]
+            urlPattern: ({ url }) => url.pathname.startsWith('/api'),
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
             }
           }
-         }]
+        ]
       }
-
     })
+    
 
   ],
 })

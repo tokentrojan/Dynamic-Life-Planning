@@ -5,6 +5,7 @@ import { db } from "../firebase"; // firebase firestore tools for saving data
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
+import InstallButton from "../components/InstallButton";
 
 function CreateTask() {
   const { currentUser } = useAuth();
@@ -58,6 +59,8 @@ function CreateTask() {
             required
           />
         </Form.Group>
+
+        <InstallButton></InstallButton>
 
         <Form.Group className="mb-3">
           <Form.Label>Task Description *</Form.Label>
