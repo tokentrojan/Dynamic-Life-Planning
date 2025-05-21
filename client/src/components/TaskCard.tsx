@@ -6,6 +6,9 @@ interface Props {
   task: Task;
   onEdit?: () => void;
   onToggleComplete?: () => void;
+  onCategoryClick?: () => void;
+  onPriorityClick?: () => void;
+  onRepeatClick?: () => void;
 }
 
 function TaskCard({ task, onEdit, onToggleComplete }: Props) {
@@ -81,21 +84,43 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
           {task.colour && (
             <>
               Catgeory: <> </>
-              <Badge bg={getTaskColour(task.colour)} className="me-2">
+              <Badge bg={getTaskColour(task.colour)} className="me-2" onClick={(e) => {
+                e.stopPropagation();
+                console.log("Category clicked:", task.colour);
+                //call onclick here
+              }}
+                style={{ cursor: "pointer" }}>
                 {task.colour.toUpperCase() ?? "Non"}
               </Badge>
             </>
           )}
           <br />
           {task.priority && (
-            <Badge bg={getBadgeColor(task.priority)} className="me-2">
+            <Badge
+              bg={getBadgeColor(task.priority)}
+              className="me-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("Priority clicked:", task.priority);
+                // Optional: call a prop like onPriorityClick(task.priority);
+              }}
+              style={{ cursor: "pointer" }}
+            >
               {task.priority.toUpperCase()}
             </Badge>
           )}
           <br />
 
           {task.recurring && task.recurringDay && (
-            <Badge bg="info">Repeats: {task.recurringDay}</Badge>
+            <Badge
+              bg="info"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log("Recurring day clicked:", task.recurringDay);
+                // Optional: call a prop like onRecurringClick(task.recurringDay);
+              }}
+              style={{ cursor: "pointer" }}
+            >Repeats: {task.recurringDay}</Badge>
           )}
           {isCompleted && (
             <Badge bg="secondary" className="ms-2">
