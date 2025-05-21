@@ -17,7 +17,7 @@ function CreateTask() {
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [doDate, setDoDate] = useState("")
+  const [doDate, setDoDate] = useState("");
   const [priority, setPriority] = useState("");
   const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
@@ -47,7 +47,7 @@ function CreateTask() {
       taskName,
       taskDescription,
       dueDate,
-      ...(doDate&& {doDate}),
+      ...(doDate && { doDate }),
       completed: false,
       ...(priority && { priority }),
       ...(colour && { colour }),
@@ -75,8 +75,6 @@ function CreateTask() {
           />
         </Form.Group>
 
-        <InstallButton></InstallButton>
-
         <Form.Group className="mb-3">
           <Form.Label>Task Description *</Form.Label>
           <Form.Control
@@ -101,14 +99,14 @@ function CreateTask() {
             </Form.Group>
           </Col>
 
-        <Form.Group className="mb-3">
-          <Form.Label>When are you doing this task?</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            value={doDate}
-            onChange={(e) => setDoDate(e.target.value)}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>When are you doing this task?</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              value={doDate}
+              onChange={(e) => setDoDate(e.target.value)}
+            />
+          </Form.Group>
 
           <Col md={6}>
             <Form.Group className="mb-3">
