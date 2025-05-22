@@ -1,17 +1,16 @@
-//there is a problem in here where you can update the completed checkbox without editing the task, so nothing is sent through TaskModal to the db. Need to fix that
-import { Card, Badge, Button, Form } from "react-bootstrap";
+import { Card, Badge, Button } from "react-bootstrap";
 import { Task } from "../types/Task";
 
 interface Props {
   task: Task;
   onEdit?: () => void;
   onToggleComplete?: () => void;
-  onCategoryClick?: () => void;
-  onPriorityClick?: () => void;
-  onRepeatClick?: () => void;
+  onCategoryClick?: (label: string) => void;
+  onPriorityClick?: (label: string) => void;
+  onRecurringClick?: (label: string) => void;
 }
 
-function TaskCard({ task, onEdit, onToggleComplete }: Props) {
+function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurringClick }: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -86,8 +85,9 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
               Catgeory: <> </>
               <Badge bg={getTaskColour(task.colour)} className="me-2" onClick={(e) => {
                 e.stopPropagation();
-                console.log("Category clicked:", task.colour);
-                //call onclick here
+                if (task.colour) {
+                  onCategoryClick?.(task.colour); // only call if task.colour is defined
+                }
               }}
                 style={{ cursor: "pointer" }}>
                 {task.colour.toUpperCase() ?? "Non"}
@@ -101,8 +101,10 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
               className="me-2"
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("Priority clicked:", task.priority);
-                // Optional: call a prop like onPriorityClick(task.priority);
+                if (task.priority) {
+                  onPriorityClick?.(task.priority); // only call if task.priority is defined
+                  console.log("priotity click")
+                }
               }}
               style={{ cursor: "pointer" }}
             >
@@ -116,8 +118,10 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
               bg="info"
               onClick={(e) => {
                 e.stopPropagation();
-                console.log("Recurring day clicked:", task.recurringDay);
-                // Optional: call a prop like onRecurringClick(task.recurringDay);
+                if (task.recurringDay) {// only call if task.recurringDay is defined
+                  onRecurringClick?.(task.recurringDay);
+                  console.log("recurringDay") 
+                }
               }}
               style={{ cursor: "pointer" }}
             >Repeats: {task.recurringDay}</Badge>
@@ -128,14 +132,6 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
             </Badge>
           )}
         </Card.Text>
-        <Form.Check
-          type="checkbox"
-          label="Completed"
-          checked={task.completed}
-          onChange={onToggleComplete}
-          className="ms-3"
-        />
-        {/* Only show edit button if onEdit was passed in */}
         {onEdit && (
           <Button variant="primary" size="sm" onClick={onEdit}>
             Edit

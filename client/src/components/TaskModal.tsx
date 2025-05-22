@@ -26,7 +26,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState('');
   const [completed, setCompleted] = useState(false);
-  const [colour, setColour] = useState(''); // ✅ Category field
+  const [colour, setColour] = useState(''); // Category field
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
