@@ -1,124 +1,78 @@
-//there is a problem in here where you can update the completed checkbox without editing the task, so nothing is sent through TaskModal to the db. Need to fix that
-import { Card, Badge, Button, Form } from "react-bootstrap";
-import { Task } from "../types/Task";
+import React from 'react';
+import { Task } from '../types/Task'; // Adjust import path as needed
 
-interface Props {
+type TaskCardProps = {
   task: Task;
-  onEdit?: () => void;
-  onToggleComplete?: () => void;
-}
+  onPriorityClick?: (priority: string) => void;
+  onEditClick?: () => void;
+  onCompleteToggle?: (completed: boolean) => void;
+};
 
-function TaskCard({ task, onEdit, onToggleComplete }: Props) {
-  const getBadgeColor = (priority?: string) => {
-    switch (priority) {
-      case "high":
-        return "danger";
-      case "medium":
-        return "warning";
-      case "low":
-        return "success";
-      default:
-        return "secondary";
-    }
-  };
-
-  const getTaskColour = (colour?: string) => {
-    switch (colour) {
-      case "blue":
-        return "primary";
-      case "red":
-        return "danger";
-      case "green":
-        return "success";
-      case "yellow":
-        return "warning";
-      case "black":
-        return "dark";
-      case "gary":
-        return "secondary";
-
-      default:
-        return "light";
-    }
-  };
-
-  const formatDueDate = (isoDate: string) => {
-    const date = new Date(isoDate);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const year = date.getFullYear();
-    const time = date.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-    return `${day}/${month}/${year} ${time}`;
-  };
-
-  // const isPastDue = new Date(task.dueDate) < new Date();
-  const isCompleted = task.completed;
-
+const TaskCard: React.FC<TaskCardProps> = ({
+  task,
+  onPriorityClick,
+  onEditClick,
+  onCompleteToggle,
+}) => {
   return (
-    <Card className="mb-3 shadow-sm">
-      <Card.Body>
-        <Card.Title>{task.taskName}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">
-          Due: {formatDueDate(task.dueDate)}
-        </Card.Subtitle>
-        <Card.Subtitle className="mb-2 text-muted">
-          Do: {formatDueDate(task.doDate ?? task.dueDate)}
-        </Card.Subtitle>
-
-        <Card.Text>
-          {task.taskDescription}
-          <br />
-          {task.duration && (
-            <>
-              Duration: {task.duration} min
-              <br />
-            </>
+    <div className="card mb-3">
+      <div className="card-body">
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="card-title">{task.taskName}</h5>
+          {onEditClick && (
+            <button className="btn btn-sm btn-outline-secondary" onClick={onEditClick}>
+              Edit
+            </button>
           )}
+        </div>
+        <p className="card-text">{task.taskDescription}</p>
 
-          {task.colour && (
-            <>
-              Catgeory: <> </>
-              <Badge bg={getTaskColour(task.colour)} className="me-2">
-                {task.colour.toUpperCase() ?? "Non"}
-              </Badge>
-            </>
-          )}
-          <br />
+        <div className="d-flex flex-wrap gap-2 align-items-center">
+          {/* Priority Badge (Clickable) */}
           {task.priority && (
-            <Badge bg={getBadgeColor(task.priority)} className="me-2">
-              {task.priority.toUpperCase()}
-            </Badge>
+            <span
+              className="badge bg-primary text-light cursor-pointer"
+              style={{ cursor: 'pointer' }}
+              onClick={() => onPriorityClick?.(task.priority!)}
+              title="Click to filter by this priority"
+            >
+              {task.priority}
+            </span>
           )}
-          <br />
 
+          {/* Colour Badge */}
+          {task.colour && (
+            <span className={`badge bg-${task.colour}`}>{task.colour}</span>
+          )}
+
+          {/* Recurring Badge */}
           {task.recurring && task.recurringDay && (
-            <Badge bg="info">Repeats: {task.recurringDay}</Badge>
+            <span className="badge bg-info text-dark">
+              Recurs: {task.recurringDay}
+            </span>
           )}
-          {isCompleted && (
-            <Badge bg="secondary" className="ms-2">
-              Completed
-            </Badge>
+
+          {/* Completed Badge */}
+          {task.completed && (
+            <span className="badge bg-success">Completed</span>
           )}
-        </Card.Text>
-        <Form.Check
-          type="checkbox"
-          label="Completed"
-          checked={task.completed}
-          onChange={onToggleComplete}
-          className="ms-3"
-        />
-        {/* Only show edit button if onEdit was passed in */}
-        {onEdit && (
-          <Button variant="primary" size="sm" onClick={onEdit}>
-            Edit
-          </Button>
-        )}
-      </Card.Body>
-    </Card>
+
+          {/* Completion Toggle */}
+          {typeof task.completed === 'boolean' && onCompleteToggle && (
+            <div className="form-check ms-auto">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                checked={task.completed}
+                onChange={(e) => onCompleteToggle(e.target.checked)}
+              />
+              <label className="form-check-label">Done</label>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
-}
+};
 
 export default TaskCard;
