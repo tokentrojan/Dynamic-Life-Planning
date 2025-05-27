@@ -1,5 +1,8 @@
 import { Card, Badge, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
 import { Task } from "../types/Task";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Props {
   task: Task;
@@ -8,6 +11,7 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
+  // categories?: { [key: string]: string };
 }
 
 function TaskCard({
@@ -17,6 +21,21 @@ function TaskCard({
   onPriorityClick,
   onRecurringClick,
 }: Props) {
+  // fetch the user's category labels once
+  const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  useEffect(() => {
+    async function loadCats() {
+      const uid = auth.currentUser?.uid;
+      if (!uid || !task.colour) return;
+      const ref = doc(db, "users", uid, "Category", "default");
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        setCategories(snap.data() as { [key: string]: string });
+      }
+    }
+    loadCats();
+  }, [task.colour]);
+
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -33,9 +52,9 @@ function TaskCard({
   const getTaskColour = (colour?: string) => {
     switch (colour) {
       case "cat1":
-        return "primary";
-      case "cat2":
         return "danger";
+      case "cat2":
+        return "primary";
       case "cat3":
         return "success";
       case "cat4":
@@ -46,7 +65,7 @@ function TaskCard({
         return "dark";
 
       default:
-        return "light";
+        return "dark";
     }
   };
 
@@ -88,19 +107,14 @@ function TaskCard({
 
           {task.colour && (
             <>
-              Catgeory: <> </>
+              Category:{" "}
               <Badge
                 bg={getTaskColour(task.colour)}
                 className="me-2"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (task.colour) {
-                    onCategoryClick?.(task.colour); // only call if task.colour is defined
-                  }
-                }}
                 style={{ cursor: "pointer" }}
               >
-                {task.colour.toUpperCase() ?? "Non"}
+                {categories[task.colour]?.toUpperCase() ??
+                  task.colour.toUpperCase()}
               </Badge>
             </>
           )}

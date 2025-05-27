@@ -12,7 +12,16 @@ const categoryColorMap: { [key: string]: string } = {
   cat4: "warning",
   cat5: "secondary",
   cat6: "dark",
-  cat7: "light",
+};
+
+const variantEmojiMap: Record<string, string> = {
+  danger: "🔴",
+  primary: "🔵",
+  success: "🟢",
+  warning: "🟡",
+  secondary: "⚪",
+  dark: "⚫",
+  light: "◻️",
 };
 
 const getColourBadgeColor = (catKey?: string) =>
@@ -92,7 +101,6 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         cat4: "Yellow",
         cat5: "Grey",
         cat6: "Black",
-        cat7: "None",
       };
       await setDoc(ref, defaultCategories);
       setCategories(defaultCategories);
@@ -151,25 +159,6 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         return "success";
       default:
         return "secondary";
-    }
-  };
-
-  const getColourBadgeColor = (c?: string) => {
-    switch (c) {
-      case "red":
-        return "danger";
-      case "blue":
-        return "primary";
-      case "green":
-        return "success";
-      case "yellow":
-        return "warning";
-      case "gray":
-        return "secondary";
-      case "black":
-        return "dark";
-      default:
-        return "light";
     }
   };
 
@@ -266,17 +255,22 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Duration (minutes)</Form.Label>
-              <Form.Control
-                type="number"
-                min={1}
-                value={duration}
-                onChange={(e) =>
-                  setDuration(
-                    e.target.value === "" ? "" : Number(e.target.value)
-                  )
-                }
-              />
+              <Form.Label>Category</Form.Label>
+              <Form.Select
+                value={colour}
+                onChange={(e) => setColour(e.target.value)}
+              >
+                <option value="">-- None --</option>
+                {Object.entries(categories).map(([catKey, catLabel]) => {
+                  const variant = getColourBadgeColor(catKey);
+                  const emoji = variantEmojiMap[variant] || "";
+                  return (
+                    <option key={catKey} value={catKey}>
+                      {emoji} {catLabel}
+                    </option>
+                  );
+                })}
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
