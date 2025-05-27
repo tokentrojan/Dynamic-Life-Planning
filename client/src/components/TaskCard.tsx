@@ -6,9 +6,10 @@ interface Props {
   task: Task;
   onEdit?: () => void;
   onToggleComplete?: () => void;
+  categories?: { [key: string]: string };
 }
 
-function TaskCard({ task, onEdit, onToggleComplete }: Props) {
+function TaskCard({ task, onEdit, onToggleComplete, categories }: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -24,18 +25,18 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
 
   const getTaskColour = (colour?: string) => {
     switch (colour) {
-      case "blue":
+      case "cat1":
         return "primary";
-      case "red":
+      case "cat2":
         return "danger";
-      case "green":
+      case "cat3":
         return "success";
-      case "yellow":
+      case "cat4":
         return "warning";
-      case "black":
-        return "dark";
-      case "gary":
+      case "cat5":
         return "secondary";
+      case "cat6":
+        return "dark";
 
       default:
         return "light";
@@ -82,7 +83,8 @@ function TaskCard({ task, onEdit, onToggleComplete }: Props) {
             <>
               Catgeory: <> </>
               <Badge bg={getTaskColour(task.colour)} className="me-2">
-                {task.colour.toUpperCase() ?? "Non"}
+                {categories?.[task.colour]?.toUpperCase() ??
+                  task.colour.toUpperCase()}
               </Badge>
             </>
           )}
