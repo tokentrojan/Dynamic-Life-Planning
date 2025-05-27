@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"; // for managing form input state
-import { Form, Button, Container, FormGroup, Row, Col } from "react-bootstrap"; // UI components
+import { useState } from "react"; // for managing form input state
+import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup,
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
 import { doc, setDoc, collection, getDocs } from "firebase/firestore";
@@ -24,6 +24,16 @@ function CreateTask() {
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
   const [colour, setColour] = useState("");
+  // const [showColours, setShowColours] = useState(false);
+
+  const colours = [
+    { name: "Red", value: "red" },
+    { name: "Blue", value: "blue" },
+    { name: "Green", value: "green" },
+    { name: "Yellow", value: "yellow" },
+    { name: "Gray", value: "gray" },
+    { name: "Black", value: "black" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);

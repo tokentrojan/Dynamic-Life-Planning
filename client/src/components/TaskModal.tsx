@@ -40,6 +40,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [colour, setColour] = useState(""); // Category field
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {

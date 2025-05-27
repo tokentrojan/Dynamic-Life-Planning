@@ -1,15 +1,22 @@
-//there is a problem in here where you can update the completed checkbox without editing the task, so nothing is sent through TaskModal to the db. Need to fix that
-import { Card, Badge, Button, Form } from "react-bootstrap";
+import { Card, Badge, Button } from "react-bootstrap";
 import { Task } from "../types/Task";
 
 interface Props {
   task: Task;
   onEdit?: () => void;
   onToggleComplete?: () => void;
-  categories?: { [key: string]: string };
+  onCategoryClick?: (label: string) => void;
+  onPriorityClick?: (label: string) => void;
+  onRecurringClick?: (label: string) => void;
 }
 
-function TaskCard({ task, onEdit, onToggleComplete, categories }: Props) {
+function TaskCard({
+  task,
+  onEdit,
+  onCategoryClick,
+  onPriorityClick,
+  onRecurringClick,
+}: Props) {
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -82,22 +89,55 @@ function TaskCard({ task, onEdit, onToggleComplete, categories }: Props) {
           {task.colour && (
             <>
               Catgeory: <> </>
-              <Badge bg={getTaskColour(task.colour)} className="me-2">
-                {categories?.[task.colour]?.toUpperCase() ??
-                  task.colour.toUpperCase()}
+              <Badge
+                bg={getTaskColour(task.colour)}
+                className="me-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (task.colour) {
+                    onCategoryClick?.(task.colour); // only call if task.colour is defined
+                  }
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                {task.colour.toUpperCase() ?? "Non"}
               </Badge>
             </>
           )}
           <br />
           {task.priority && (
-            <Badge bg={getBadgeColor(task.priority)} className="me-2">
+            <Badge
+              bg={getBadgeColor(task.priority)}
+              className="me-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (task.priority) {
+                  onPriorityClick?.(task.priority); // only call if task.priority is defined
+                  console.log("priotity click");
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
               {task.priority.toUpperCase()}
             </Badge>
           )}
           <br />
 
           {task.recurring && task.recurringDay && (
-            <Badge bg="info">Repeats: {task.recurringDay}</Badge>
+            <Badge
+              bg="info"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (task.recurringDay) {
+                  // only call if task.recurringDay is defined
+                  onRecurringClick?.(task.recurringDay);
+                  console.log("recurringDay");
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
+              Repeats: {task.recurringDay}
+            </Badge>
           )}
           {isCompleted && (
             <Badge bg="secondary" className="ms-2">
@@ -105,14 +145,6 @@ function TaskCard({ task, onEdit, onToggleComplete, categories }: Props) {
             </Badge>
           )}
         </Card.Text>
-        <Form.Check
-          type="checkbox"
-          label="Completed"
-          checked={task.completed}
-          onChange={onToggleComplete}
-          className="ms-3"
-        />
-        {/* Only show edit button if onEdit was passed in */}
         {onEdit && (
           <Button variant="primary" size="sm" onClick={onEdit}>
             Edit

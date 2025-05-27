@@ -1,4 +1,4 @@
-import { Container, Form, Row, Col } from 'react-bootstrap';
+import { Container, Form, Row, Col, Modal } from 'react-bootstrap';
 import { useState } from 'react';
 import { useTasks } from '../data/firebasetasks'; // Custom hook to load tasks from Firestore
 import TaskCard from '../components/TaskCard'; // Reusable card to show a task
@@ -16,6 +16,33 @@ const Tasks = () => {
     unsorted: true,
     completed: false,
   });
+
+const [labelFilter, setLabelFilter] = useState<{ colour?: string, priority?: string, recurringDay?: string }>({});
+const [showLabelFilterModal, setShowLabelFilterModal] = useState(false);
+
+
+  const handleCategoryClick = (label: string) => {
+  setLabelFilter({ colour: label });
+  setShowLabelFilterModal(true);
+};
+
+  const handlePriorityClick = (label: string) => {
+  setLabelFilter({ priority: label });
+  setShowLabelFilterModal(true);
+  };
+  const handleRecurringClick = (label: string) => {
+  setLabelFilter({ recurringDay: label });
+  setShowLabelFilterModal(true);
+  };
+
+const shownTasks = tasks.filter(task => {
+  return (
+    (!labelFilter.colour || task.colour === labelFilter.colour) &&
+    (!labelFilter.priority || task.priority === labelFilter.priority) &&
+    (!labelFilter.recurringDay || task.recurringDay === labelFilter.recurringDay)
+  );
+});
+
 
   // UI state for how tasks should be sorted
   const [sortMethod, setSortMethod] = useState<'priority' | 'dueDate'>('priority');
@@ -100,17 +127,23 @@ const Tasks = () => {
         </Form.Select>
       </Form.Group>
 
-      {/* Show filtered and sorted task list */}
       {filteredTasks.length === 0 ? (
         <p>No tasks match the selected filters.</p>
       ) : (
         filteredTasks.map(task => (
           <div
             key={task.taskID}
-            onClick={() => setSelectedTask(task)} // Open modal on click
+            onClick={() => setSelectedTask(task)}
             style={{ cursor: 'pointer' }}
           >
-            <TaskCard task={task} />
+            <TaskCard
+              task={task}
+              onEdit={() => setSelectedTask(task)}
+              onToggleComplete={() => {/* handle toggle */ }}
+              onCategoryClick={handleCategoryClick}
+              onPriorityClick={handlePriorityClick}
+              onRecurringClick={handleRecurringClick}
+            />
           </div>
         ))
       )}
@@ -123,9 +156,38 @@ const Tasks = () => {
           onClose={() => setSelectedTask(null)} // Close modal
         />
       )}
+      {/* Modal for viewing tasks by label */}
+      <Modal show={showLabelFilterModal} onHide={() => setShowLabelFilterModal(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      Showing tasks by filter:
+      {" " + (labelFilter.colour || labelFilter.priority || labelFilter.recurringDay)?.toUpperCase()}
+    </Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {shownTasks.length > 0 ? (
+      shownTasks.map(task => (
+        <TaskCard
+          key={task.taskID}
+          task={task}
+          onEdit={() => setSelectedTask(task)}
+          onCategoryClick={handleCategoryClick}
+          onPriorityClick={handlePriorityClick}
+          onRecurringClick={handleRecurringClick}
+        />
+      ))
+    ) : (
+      <p>No tasks with this label.</p>
+    )}
+  </Modal.Body>
+</Modal>
+
       <CreateTaskButton />
+
     </Container>
+
   );
+
 };
 
 export default Tasks;
