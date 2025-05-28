@@ -57,6 +57,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     }
   }, [task, show]);
 
+  // Maps your internal category keys (cat1…cat6) to Bootstrap badge variants.
   const categoryColorMap: { [key: string]: string } = {
     cat1: "danger",
     cat2: "primary",
@@ -66,6 +67,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     cat6: "dark",
   };
 
+  // Maps each Bootstrap badge variant to a corresponding emoji.
   const variantEmojiMap: Record<string, string> = {
     danger: "🔴",
     primary: "🔵",
@@ -80,10 +82,13 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     categoryColorMap[catKey ?? ""] || "light";
 
   useEffect(() => {
+    // When the component mounts, load the user's category definitions.
     fetchCategories();
   }, []);
 
+  // Fetches (or initializes) the user's category labels from Firestore
   const fetchCategories = async () => {
+    // Determine the current user’s ID
     const userID = auth.currentUser?.uid || localStorage.getItem("cachedUID");
     if (!userID) return;
 
@@ -91,8 +96,10 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     const snap = await getDoc(ref);
 
     if (snap.exists()) {
+      // If the doc already exists, pull its data into our state
       setCategories(snap.data() as { [key: string]: string });
     } else {
+      // Otherwise, create it with a set of sane defaults…
       console.log("No category doc found. Creating default categories...");
       const defaultCategories = {
         cat1: "Red",
