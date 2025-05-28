@@ -105,7 +105,7 @@ function TaskCard({
             </>
           )}
 
-          {task.colour && (
+          {task.colour && ( // Only render if this task has a `colour` key
             <>
               Category:{" "}
               <Badge
@@ -113,6 +113,10 @@ function TaskCard({
                 className="me-2"
                 style={{ cursor: "pointer" }}
               >
+                {
+                  // Look up the human‐readable label from `categories` state (e.g. "Red")
+                  // and uppercase it; if missing, fall back to the raw key ("CAT1")
+                }
                 {categories[task.colour]?.toUpperCase() ??
                   task.colour.toUpperCase()}
               </Badge>
