@@ -5,7 +5,7 @@ import { db } from "../firebase"; // firebase firestore tools for saving data
 import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
-import CategoryManager from "./CategoryManager";
+import CategoryManager from "../components/CategoryManager";
 import { Category } from "../types/Task";
 
 function CreateTask() {

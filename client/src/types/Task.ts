@@ -1,5 +1,5 @@
 export type Priority = 'low' | 'medium' | 'high';
-export type Colour = 'red' | 'blue' | 'green' | 'yellow'| 'black' | 'gray';
+export type Colour = 'red' | 'blue' | 'green' | 'yellow'| 'black' | 'grey';
 
 export interface Task {
   userID: string;            // UID from Firebase Auth

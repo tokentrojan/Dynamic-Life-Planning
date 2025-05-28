@@ -5,28 +5,6 @@ import { db, auth } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { v4 as uuid } from "uuid";
 
-const categoryColorMap: { [key: string]: string } = {
-  cat1: "danger",
-  cat2: "primary",
-  cat3: "success",
-  cat4: "warning",
-  cat5: "secondary",
-  cat6: "dark",
-};
-
-const variantEmojiMap: Record<string, string> = {
-  danger: "🔴",
-  primary: "🔵",
-  success: "🟢",
-  warning: "🟡",
-  secondary: "⚪",
-  dark: "⚫",
-  light: "◻️",
-};
-
-const getColourBadgeColor = (catKey?: string) =>
-  categoryColorMap[catKey ?? ""] || "light";
-
 interface TaskModalProps {
   task?: Task;
   show: boolean;
@@ -78,6 +56,28 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setIsEditing(true); // Start in form mode for new task
     }
   }, [task, show]);
+
+  const categoryColorMap: { [key: string]: string } = {
+    cat1: "danger",
+    cat2: "primary",
+    cat3: "success",
+    cat4: "warning",
+    cat5: "secondary",
+    cat6: "dark",
+  };
+
+  const variantEmojiMap: Record<string, string> = {
+    danger: "🔴",
+    primary: "🔵",
+    success: "🟢",
+    warning: "🟡",
+    secondary: "⚪",
+    dark: "⚫",
+    light: "◻️",
+  };
+
+  const getColourBadgeColor = (catKey?: string) =>
+    categoryColorMap[catKey ?? ""] || "light";
 
   useEffect(() => {
     fetchCategories();
@@ -270,21 +270,6 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
                     </option>
                   );
                 })}
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
-              <Form.Select
-                value={colour}
-                onChange={(e) => setColour(e.target.value)}
-              >
-                <option value="">-- None --</option>
-                {Object.entries(categories).map(([catKey, catLabel], idx) => (
-                  <option key={catKey} value={catKey}>
-                    {catLabel}
-                  </option>
-                ))}
               </Form.Select>
             </Form.Group>
 
