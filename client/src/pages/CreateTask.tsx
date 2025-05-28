@@ -1,10 +1,12 @@
 import { useState } from "react"; // for managing form input state
-import { Form, Button, Container, FormGroup, Row, Col } from "react-bootstrap"; // UI components
+import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup,
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
+import CategoryManager from "../components/CategoryManager";
+import { Category } from "../types/Task";
 
 function CreateTask() {
   const { currentUser } = useAuth();
@@ -16,13 +18,13 @@ function CreateTask() {
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [doDate, setDoDate] = useState("")
+  const [doDate, setDoDate] = useState("");
   const [priority, setPriority] = useState("");
   const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
   const [colour, setColour] = useState("");
-  const [showColours, setShowColours] = useState(false);
+  // const [showColours, setShowColours] = useState(false);
 
   const colours = [
     { name: "Red", value: "red" },
@@ -46,7 +48,7 @@ function CreateTask() {
       taskName,
       taskDescription,
       dueDate,
-      ...(doDate&& {doDate}),
+      ...(doDate && { doDate }),
       completed: false,
       ...(priority && { priority }),
       ...(colour && { colour }),
@@ -98,14 +100,14 @@ function CreateTask() {
             </Form.Group>
           </Col>
 
-        <Form.Group className="mb-3">
-          <Form.Label>When are you doing this task?</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            value={doDate}
-            onChange={(e) => setDoDate(e.target.value)}
-          />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>When are you doing this task?</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              value={doDate}
+              onChange={(e) => setDoDate(e.target.value)}
+            />
+          </Form.Group>
 
           <Col md={6}>
             <Form.Group className="mb-3">
@@ -139,23 +141,6 @@ function CreateTask() {
               />
             </Form.Group>
           </Col>
-
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Task Category</Form.Label>
-              <Form.Select
-                value={colour}
-                onChange={(e) => setColour(e.target.value)}
-              >
-                <option value="">Select a colour</option>
-                {colours.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
         </Row>
 
         <Form.Check
@@ -184,6 +169,7 @@ function CreateTask() {
           </Form.Group>
         )}
 
+        <CategoryManager></CategoryManager>
         <Button variant="primary" type="submit">
           Create Task
         </Button>

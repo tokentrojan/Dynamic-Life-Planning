@@ -17,7 +17,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { AuthProvider } from "./AuthProvider";
 import { ThemeProvider, useTheme } from "./ThemeContext";
-
 // Wrapper component to apply theme to the entire app
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
