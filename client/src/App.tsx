@@ -9,17 +9,20 @@ import Navbar from "./components/NavBar";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Planner from "./pages/Planner";
-import Tasks from "./pages/Tasks"; // unified task view
-import CreateTask from "./pages/CreateTask"; // will be implemented in Tasks Page soon
+import Tasks from "./pages/Tasks";
+import CreateTask from "./pages/CreateTask";
+import Settings from "./pages/Settings";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { AuthProvider } from "./AuthProvider";
+import { ThemeProvider, useTheme } from "./ThemeContext";
 
-
-function App() {
+// Wrapper component to apply theme to the entire app
+function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { backgroundColor } = useTheme();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,13 +30,13 @@ function App() {
       setLoading(false);
     });
 
-    return () => unsubscribe(); // cleanup listener on unmount
+    return () => unsubscribe();
   }, []);
 
-  if (loading) return <div>Loading...</div>; //return for while the site is loading
+  if (loading) return <div>Loading...</div>;
 
   return (
-    <AuthProvider>
+    <div style={{ backgroundColor, minHeight: "100vh" }}>
       <Router>
         {isAuthenticated && <Navbar />}
         <Routes>
@@ -45,15 +48,15 @@ function App() {
           />
           <Route
             path="/tasks"
-            element={
-              isAuthenticated ? <Tasks /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <Tasks /> : <Navigate to="/login" />}
           />
           <Route
             path="/create"
-            element={
-              isAuthenticated ? <CreateTask /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <CreateTask /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/settings"
+            element={isAuthenticated ? <Settings /> : <Navigate to="/login" />}
           />
           <Route
             path="*"
@@ -61,7 +64,17 @@ function App() {
           />
         </Routes>
       </Router>
-    </AuthProvider>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
