@@ -9,8 +9,7 @@ import Navbar from "./components/NavBar";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Planner from "./pages/Planner";
-import Tasks from "./pages/Tasks"; // unified task view
-import CreateTask from "./pages/CreateTask"; // will be implemented in Tasks Page soon
+import Tasks from "./pages/Tasks"; // unified task view // will be implemented in Tasks Page soon
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
@@ -47,12 +46,6 @@ function App() {
             path="/tasks"
             element={
               isAuthenticated ? <Tasks /> : <Navigate to="/login" />
-            }
-          />
-          <Route
-            path="/create"
-            element={
-              isAuthenticated ? <CreateTask /> : <Navigate to="/login" />
             }
           />
           <Route
