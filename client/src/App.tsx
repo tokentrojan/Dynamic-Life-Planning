@@ -37,21 +37,14 @@ function App() {
         {isAuthenticated && <Navbar />}
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route
             path="/planner"
             element={isAuthenticated ? <Planner /> : <Navigate to="/login" />}
           />
           <Route
-            path="/sorted"
-            element={
-              isAuthenticated ? <SortedTasks /> : <Navigate to="/login" />
-            }
-          />
-          <Route
-            path="/unsorted"
-            element={
-              isAuthenticated ? <UnsortedTasks /> : <Navigate to="/login" />
-            }
+            path="/tasks"
+            element={isAuthenticated ? <Tasks /> : <Navigate to="/login" />}
           />
           <Route
             path="/create"
@@ -62,11 +55,6 @@ function App() {
           <Route
             path="*"
             element={<Navigate to={isAuthenticated ? "/planner" : "/login"} />}
-          />
-          <Route path="/signup" element={<SignUp />} />
-          <Route
-            path="/completed"
-            element={isAuthenticated ? <Completed /> : <Navigate to="/login" />}
           />
         </Routes>
       </Router>
