@@ -2,9 +2,11 @@ import { useState } from "react"; // for managing form input state
 import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup,
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
+import CategoryManager from "../components/CategoryManager";
+import { Category } from "../types/Task";
 
 function CreateTask() {
   const { currentUser } = useAuth();
@@ -139,23 +141,6 @@ function CreateTask() {
               />
             </Form.Group>
           </Col>
-
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Task Category</Form.Label>
-              <Form.Select
-                value={colour}
-                onChange={(e) => setColour(e.target.value)}
-              >
-                <option value="">Select a colour</option>
-                {colours.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
         </Row>
 
         <Form.Check
@@ -184,6 +169,7 @@ function CreateTask() {
           </Form.Group>
         )}
 
+        <CategoryManager></CategoryManager>
         <Button variant="primary" type="submit">
           Create Task
         </Button>

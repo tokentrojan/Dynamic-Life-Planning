@@ -1,5 +1,8 @@
 import { Card, Badge, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
 import { Task } from "../types/Task";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Props {
   task: Task;
@@ -8,9 +11,31 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
+  // categories?: { [key: string]: string };
 }
 
-function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurringClick }: Props) {
+function TaskCard({
+  task,
+  onEdit,
+  onCategoryClick,
+  onPriorityClick,
+  onRecurringClick,
+}: Props) {
+  // fetch the user's category labels once
+  const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  useEffect(() => {
+    async function loadCats() {
+      const uid = auth.currentUser?.uid;
+      if (!uid || !task.colour) return;
+      const ref = doc(db, "users", uid, "Category", "default");
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        setCategories(snap.data() as { [key: string]: string });
+      }
+    }
+    loadCats();
+  }, [task.colour]);
+
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
       case "high":
@@ -26,21 +51,21 @@ function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurring
 
   const getTaskColour = (colour?: string) => {
     switch (colour) {
-      case "blue":
-        return "primary";
-      case "red":
+      case "cat1":
         return "danger";
-      case "green":
+      case "cat2":
+        return "primary";
+      case "cat3":
         return "success";
-      case "yellow":
+      case "cat4":
         return "warning";
-      case "black":
-        return "dark";
-      case "gary":
+      case "cat5":
         return "secondary";
+      case "cat6":
+        return "dark";
 
       default:
-        return "light";
+        return "dark";
     }
   };
 
@@ -80,17 +105,20 @@ function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurring
             </>
           )}
 
-          {task.colour && (
+          {task.colour && ( // Only render if this task has a `colour` key
             <>
-              Catgeory: <> </>
-              <Badge bg={getTaskColour(task.colour)} className="me-2" onClick={(e) => {
-                e.stopPropagation();
-                if (task.colour) {
-                  onCategoryClick?.(task.colour); // only call if task.colour is defined
+              Category:{" "}
+              <Badge
+                bg={getTaskColour(task.colour)}
+                className="me-2"
+                style={{ cursor: "pointer" }}
+              >
+                {
+                  // Look up the human‐readable label from `categories` state (e.g. "Red")
+                  // and uppercase it; if missing, fall back to the raw key ("CAT1")
                 }
-              }}
-                style={{ cursor: "pointer" }}>
-                {task.colour.toUpperCase() ?? "Non"}
+                {categories[task.colour]?.toUpperCase() ??
+                  task.colour.toUpperCase()}
               </Badge>
             </>
           )}
@@ -103,7 +131,7 @@ function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurring
                 e.stopPropagation();
                 if (task.priority) {
                   onPriorityClick?.(task.priority); // only call if task.priority is defined
-                  console.log("priotity click")
+                  console.log("priotity click");
                 }
               }}
               style={{ cursor: "pointer" }}
@@ -118,13 +146,16 @@ function TaskCard({ task, onEdit,  onCategoryClick, onPriorityClick, onRecurring
               bg="info"
               onClick={(e) => {
                 e.stopPropagation();
-                if (task.recurringDay) {// only call if task.recurringDay is defined
+                if (task.recurringDay) {
+                  // only call if task.recurringDay is defined
                   onRecurringClick?.(task.recurringDay);
-                  console.log("recurringDay") 
+                  console.log("recurringDay");
                 }
               }}
               style={{ cursor: "pointer" }}
-            >Repeats: {task.recurringDay}</Badge>
+            >
+              Repeats: {task.recurringDay}
+            </Badge>
           )}
           {isCompleted && (
             <Badge bg="secondary" className="ms-2">

@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'; // NEW: add useEffect
-import { Modal, Button, Form, Badge, Card } from 'react-bootstrap';
-import { Task } from '../types/Task';
-import { db, auth } from '../firebase';
-import { doc, setDoc, updateDoc } from 'firebase/firestore';
-import { v4 as uuid } from 'uuid';
-
+import { useState, useEffect } from "react"; // NEW: add useEffect
+import { Modal, Button, Form, Badge, Card } from "react-bootstrap";
+import { Task } from "../types/Task";
+import { db, auth } from "../firebase";
+import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
+import { v4 as uuid } from "uuid";
 
 interface TaskModalProps {
   task?: Task;
@@ -17,16 +16,17 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [isEditing, setIsEditing] = useState(!task); // if no task, we're creating
 
   // Form state
-  const [taskName, setTaskName] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [doDate, setDoDate] = useState('');
-  const [priority, setPriority] = useState('');
-  const [duration, setDuration] = useState<number | ''>('');
+  const [taskName, setTaskName] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [doDate, setDoDate] = useState("");
+  const [priority, setPriority] = useState("");
+  const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
-  const [recurringDay, setRecurringDay] = useState('');
+  const [recurringDay, setRecurringDay] = useState("");
   const [completed, setCompleted] = useState(false);
-  const [colour, setColour] = useState(''); // Category field
+  const [colour, setColour] = useState(""); //  Category field
+  const [categories, setCategories] = useState<{ [key: string]: string }>({});
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
@@ -34,28 +34,85 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setTaskName(task.taskName);
       setTaskDescription(task.taskDescription);
       setDueDate(task.dueDate);
-      setDoDate(task.doDate ?? '');
-      setPriority(task.priority ?? '');
-      setDuration(task.duration ?? '');
+      setDoDate(task.doDate ?? "");
+      setPriority(task.priority ?? "");
+      setDuration(task.duration ?? "");
       setRecurring(task.recurring ?? false);
-      setRecurringDay(task.recurringDay ?? '');
+      setRecurringDay(task.recurringDay ?? "");
       setCompleted(task.completed ?? false);
-      setColour(task.colour ?? '');
+      setColour(task.colour ?? "");
       setIsEditing(false); // Start in view mode
     } else {
-      setTaskName('');
-      setTaskDescription('');
-      setDueDate('');
-      setDoDate('');
-      setPriority('');
-      setDuration('');
+      setTaskName("");
+      setTaskDescription("");
+      setDueDate("");
+      setDoDate("");
+      setPriority("");
+      setDuration("");
       setRecurring(false);
-      setRecurringDay('');
+      setRecurringDay("");
       setCompleted(false);
-      setColour('');
+      setColour("");
       setIsEditing(true); // Start in form mode for new task
     }
   }, [task, show]);
+
+  // Maps your internal category keys (cat1…cat6) to Bootstrap badge variants.
+  const categoryColorMap: { [key: string]: string } = {
+    cat1: "danger",
+    cat2: "primary",
+    cat3: "success",
+    cat4: "warning",
+    cat5: "secondary",
+    cat6: "dark",
+  };
+
+  // Maps each Bootstrap badge variant to a corresponding emoji.
+  const variantEmojiMap: Record<string, string> = {
+    danger: "🔴",
+    primary: "🔵",
+    success: "🟢",
+    warning: "🟡",
+    secondary: "⚪",
+    dark: "⚫",
+    light: "◻️",
+  };
+
+  const getColourBadgeColor = (catKey?: string) =>
+    categoryColorMap[catKey ?? ""] || "light";
+
+  useEffect(() => {
+    // When the component mounts, load the user's category definitions.
+    fetchCategories();
+  }, []);
+
+  // Fetches (or initializes) the user's category labels from Firestore
+  const fetchCategories = async () => {
+    // Determine the current user’s ID
+    const userID = auth.currentUser?.uid || localStorage.getItem("cachedUID");
+    if (!userID) return;
+
+    const ref = doc(db, "users", userID, "Category", "default");
+    const snap = await getDoc(ref);
+
+    if (snap.exists()) {
+      // If the doc already exists, pull its data into our state
+      setCategories(snap.data() as { [key: string]: string });
+    } else {
+      // Otherwise, create it with a set of sane defaults…
+      console.log("No category doc found. Creating default categories...");
+      const defaultCategories = {
+        cat1: "Red",
+        cat2: "Blue",
+        cat3: "Green",
+        cat4: "Yellow",
+        cat5: "Grey",
+        cat6: "Black",
+      };
+      await setDoc(ref, defaultCategories);
+      setCategories(defaultCategories);
+    }
+  };
 
   // Save or create task
   const handleSave = async () => {
@@ -64,7 +121,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
 
     if (isEditing && task) {
       // Update existing task
-      const ref = doc(db, 'users', userID, 'tasks', task.taskID);
+      const ref = doc(db, "users", userID, "tasks", task.taskID);
       await updateDoc(ref, {
         taskName,
         taskDescription,
@@ -80,7 +137,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     } else {
       // Create new task
       const taskID = uuid();
-      const ref = doc(db, 'users', userID, 'tasks', taskID);
+      const ref = doc(db, "users", userID, "tasks", taskID);
       await setDoc(ref, {
         userID,
         taskID,
@@ -101,35 +158,27 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
 
   const getPriorityBadgeColor = (p?: string) => {
     switch (p) {
-      case 'high': return 'danger';
-      case 'medium': return 'warning';
-      case 'low': return 'success';
-      default: return 'secondary';
-    }
-  };
-
-  const getColourBadgeColor = (c?: string) => {
-    switch (c) {
-      case 'red': return 'danger';
-      case 'blue': return 'primary';
-      case 'green': return 'success';
-      case 'yellow': return 'warning';
-      case 'gray': return 'secondary';
-      case 'black': return 'dark';
-      default: return 'light';
+      case "high":
+        return "danger";
+      case "medium":
+        return "warning";
+      case "low":
+        return "success";
+      default:
+        return "secondary";
     }
   };
 
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+      dateStyle: "medium",
+      timeStyle: "short",
     });
 
   return (
     <Modal show={show} onHide={onClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>{isEditing ? 'Edit Task' : 'Create Task'}</Modal.Title>
+        <Modal.Title>{isEditing ? "Edit Task" : "Create Task"}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
@@ -147,15 +196,15 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
             )}
             {colour && (
               <Badge bg={getColourBadgeColor(colour)} className="me-2">
-                {colour.toUpperCase()}
+                {categories[colour]?.toUpperCase() ?? colour.toUpperCase()}
               </Badge>
             )}
             {recurring && recurringDay && (
-              <Badge bg="info" className="me-2">Repeats: {recurringDay}</Badge>
+              <Badge bg="info" className="me-2">
+                Repeats: {recurringDay}
+              </Badge>
             )}
-            {completed && (
-              <Badge bg="secondary">Completed</Badge>
-            )}
+            {completed && <Badge bg="secondary">Completed</Badge>}
           </Card>
         ) : (
           <Form>
@@ -201,7 +250,10 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
 
             <Form.Group className="mb-3">
               <Form.Label>Priority</Form.Label>
-              <Form.Select value={priority} onChange={(e) => setPriority(e.target.value)}>
+              <Form.Select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
                 <option value="">-- None --</option>
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -210,27 +262,21 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Duration (minutes)</Form.Label>
-              <Form.Control
-                type="number"
-                min={1}
-                value={duration}
-                onChange={(e) =>
-                  setDuration(e.target.value === '' ? '' : Number(e.target.value))
-                }
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
               <Form.Label>Category</Form.Label>
-              <Form.Select value={colour} onChange={(e) => setColour(e.target.value)}>
+              <Form.Select
+                value={colour}
+                onChange={(e) => setColour(e.target.value)}
+              >
                 <option value="">-- None --</option>
-                <option value="red">Red</option>
-                <option value="blue">Blue</option>
-                <option value="green">Green</option>
-                <option value="yellow">Yellow</option>
-                <option value="gray">Gray</option>
-                <option value="black">Black</option>
+                {Object.entries(categories).map(([catKey, catLabel]) => {
+                  const variant = getColourBadgeColor(catKey);
+                  const emoji = variantEmojiMap[variant] || "";
+                  return (
+                    <option key={catKey} value={catKey}>
+                      {emoji} {catLabel}
+                    </option>
+                  );
+                })}
               </Form.Select>
             </Form.Group>
 
@@ -282,8 +328,11 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
             <Button variant="secondary" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant={isExistingTask ? 'success' : 'primary'} onClick={handleSave}>
-              {isExistingTask ? 'Save Changes' : 'Create Task'}
+            <Button
+              variant={isExistingTask ? "success" : "primary"}
+              onClick={handleSave}
+            >
+              {isExistingTask ? "Save Changes" : "Create Task"}
             </Button>
           </>
         )}
