@@ -1,19 +1,21 @@
-import { Container, Form } from 'react-bootstrap';
-import { useTasks } from '../data/firebasetasks';
-import TaskCard from '../components/TaskCard';
-import TaskModal from '../components/TaskModal'; // new
-import { Task } from '../types/Task'; // new
-import { useState } from 'react'; // new
+import { Container, Form } from "react-bootstrap";
+import { useTasks } from "../data/firebasetasks";
+import TaskCard from "../components/TaskCard";
+import TaskModal from "../components/TaskModal"; // new
+import { Task } from "../types/Task"; // new
+import { useState } from "react"; // new
 
 const SortedTasks = () => {
   const tasks = useTasks();
-  const [sortMethod, setSortMethod] = useState<'priority' | 'dueDate'>('priority');
+  const [sortMethod, setSortMethod] = useState<"priority" | "dueDate">(
+    "priority"
+  );
   const [selectedTask, setSelectedTask] = useState<Task | null>(null); // new
 
   const sortedTasks = tasks
-    .filter(task => !!task.priority && !task.completed)
+    .filter((task) => !!task.priority && !task.completed)
     .sort((a, b) => {
-      if (sortMethod === 'priority') {
+      if (sortMethod === "priority") {
         const order = { high: 1, medium: 2, low: 3 };
         return (order[a.priority!] ?? 4) - (order[b.priority!] ?? 4);
       }
@@ -28,7 +30,9 @@ const SortedTasks = () => {
         <Form.Label>Sort by:</Form.Label>
         <Form.Select
           value={sortMethod}
-          onChange={(e) => setSortMethod(e.target.value as 'priority' | 'dueDate')}
+          onChange={(e) =>
+            setSortMethod(e.target.value as "priority" | "dueDate")
+          }
         >
           <option value="priority">Priority</option>
           <option value="dueDate">Due Date</option>
@@ -39,8 +43,15 @@ const SortedTasks = () => {
         <p>No sorted tasks found.</p>
       ) : (
         sortedTasks.map((task) => (
-          <div key={task.taskID} onClick={() => setSelectedTask(task)} style={{ cursor: 'pointer' }}>
-            <TaskCard task={task} onEdit={() => setSelectedTask(task)}></TaskCard>
+          <div
+            key={task.taskID}
+            onClick={() => setSelectedTask(task)}
+            style={{ cursor: "pointer" }}
+          >
+            <TaskCard
+              task={task}
+              onEdit={() => setSelectedTask(task)}
+            ></TaskCard>
           </div>
         ))
       )}

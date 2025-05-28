@@ -16,7 +16,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
 import { AuthProvider } from "./AuthProvider";
 
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -45,9 +44,7 @@ function App() {
           />
           <Route
             path="/tasks"
-            element={
-              isAuthenticated ? <Tasks /> : <Navigate to="/login" />
-            }
+            element={isAuthenticated ? <Tasks /> : <Navigate to="/login" />}
           />
           <Route
             path="/create"
