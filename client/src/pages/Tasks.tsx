@@ -1,10 +1,10 @@
-import { Container, Form, Row, Col, Modal } from 'react-bootstrap';
-import { useState } from 'react';
-import { useTasks } from '../data/firebasetasks'; // Custom hook to load tasks from Firestore
-import TaskCard from '../components/TaskCard'; // Reusable card to show a task
-import TaskModal from '../components/TaskModal'; // Modal to view/edit a task
-import { Task } from '../types/Task'; // Task type definition
-import CreateTaskButton from '../components/CreateTaskButton';
+import { Container, Form, Row, Col, Modal } from "react-bootstrap";
+import { useState } from "react";
+import { useTasks } from "../data/firebasetasks"; // Custom hook to load tasks from Firestore
+import TaskCard from "../components/TaskCard"; // Reusable card to show a task
+import TaskModal from "../components/TaskModal"; // Modal to view/edit a task
+import { Task } from "../types/Task"; // Task type definition
+import CreateTaskButton from "../components/CreateTaskButton";
 
 const Tasks = () => {
   // Load tasks from Firestore
@@ -17,42 +17,47 @@ const Tasks = () => {
     completed: false,
   });
 
-const [labelFilter, setLabelFilter] = useState<{ colour?: string, priority?: string, recurringDay?: string }>({});
-const [showLabelFilterModal, setShowLabelFilterModal] = useState(false);
-
+  const [labelFilter, setLabelFilter] = useState<{
+    colour?: string;
+    priority?: string;
+    recurringDay?: string;
+  }>({});
+  const [showLabelFilterModal, setShowLabelFilterModal] = useState(false);
 
   const handleCategoryClick = (label: string) => {
-  setLabelFilter({ colour: label });
-  setShowLabelFilterModal(true);
-};
+    setLabelFilter({ colour: label });
+    setShowLabelFilterModal(true);
+  };
 
   const handlePriorityClick = (label: string) => {
-  setLabelFilter({ priority: label });
-  setShowLabelFilterModal(true);
+    setLabelFilter({ priority: label });
+    setShowLabelFilterModal(true);
   };
   const handleRecurringClick = (label: string) => {
-  setLabelFilter({ recurringDay: label });
-  setShowLabelFilterModal(true);
+    setLabelFilter({ recurringDay: label });
+    setShowLabelFilterModal(true);
   };
 
-const shownTasks = tasks.filter(task => {
-  return (
-    (!labelFilter.colour || task.colour === labelFilter.colour) &&
-    (!labelFilter.priority || task.priority === labelFilter.priority) &&
-    (!labelFilter.recurringDay || task.recurringDay === labelFilter.recurringDay)
-  );
-});
-
+  const shownTasks = tasks.filter((task) => {
+    return (
+      (!labelFilter.colour || task.colour === labelFilter.colour) &&
+      (!labelFilter.priority || task.priority === labelFilter.priority) &&
+      (!labelFilter.recurringDay ||
+        task.recurringDay === labelFilter.recurringDay)
+    );
+  });
 
   // UI state for how tasks should be sorted
-  const [sortMethod, setSortMethod] = useState<'priority' | 'dueDate'>('priority');
+  const [sortMethod, setSortMethod] = useState<"priority" | "dueDate">(
+    "priority"
+  );
 
   // UI state to track which task (if any) is currently opened in a modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // Toggle a filter checkbox (sorted, unsorted, completed)
   const handleFilterToggle = (key: keyof typeof filters) => {
-    setFilters(prev => ({ ...prev, [key]: !prev[key] }));
+    setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Filter logic helpers
@@ -62,7 +67,7 @@ const shownTasks = tasks.filter(task => {
 
   // Apply filters and sorting to the task list
   const filteredTasks = tasks
-    .filter(task => {
+    .filter((task) => {
       return (
         (filters.sorted && isSorted(task)) ||
         (filters.unsorted && isUnsorted(task)) ||
@@ -70,10 +75,10 @@ const shownTasks = tasks.filter(task => {
       );
     })
     .sort((a, b) => {
-      if (sortMethod === 'priority') {
+      if (sortMethod === "priority") {
         const order = { high: 1, medium: 2, low: 3 };
-        const aPriority = a.priority ?? 'low';
-        const bPriority = b.priority ?? 'low';
+        const aPriority = a.priority ?? "low";
+        const bPriority = b.priority ?? "low";
         return (order[aPriority] ?? 4) - (order[bPriority] ?? 4);
       }
 
@@ -93,7 +98,7 @@ const shownTasks = tasks.filter(task => {
               type="checkbox"
               label="Sorted"
               checked={filters.sorted}
-              onChange={() => handleFilterToggle('sorted')}
+              onChange={() => handleFilterToggle("sorted")}
             />
           </Col>
           <Col xs={12} md={4}>
@@ -101,7 +106,7 @@ const shownTasks = tasks.filter(task => {
               type="checkbox"
               label="Unsorted"
               checked={filters.unsorted}
-              onChange={() => handleFilterToggle('unsorted')}
+              onChange={() => handleFilterToggle("unsorted")}
             />
           </Col>
           <Col xs={12} md={4}>
@@ -109,7 +114,7 @@ const shownTasks = tasks.filter(task => {
               type="checkbox"
               label="Completed"
               checked={filters.completed}
-              onChange={() => handleFilterToggle('completed')}
+              onChange={() => handleFilterToggle("completed")}
             />
           </Col>
         </Row>
@@ -120,7 +125,9 @@ const shownTasks = tasks.filter(task => {
         <Form.Label>Sort by:</Form.Label>
         <Form.Select
           value={sortMethod}
-          onChange={(e) => setSortMethod(e.target.value as 'priority' | 'dueDate')}
+          onChange={(e) =>
+            setSortMethod(e.target.value as "priority" | "dueDate")
+          }
         >
           <option value="priority">Priority</option>
           <option value="dueDate">Due Date</option>
@@ -130,16 +137,18 @@ const shownTasks = tasks.filter(task => {
       {filteredTasks.length === 0 ? (
         <p>No tasks match the selected filters.</p>
       ) : (
-        filteredTasks.map(task => (
+        filteredTasks.map((task) => (
           <div
             key={task.taskID}
             onClick={() => setSelectedTask(task)}
-            style={{ cursor: 'pointer' }}
+            style={{ cursor: "pointer" }}
           >
             <TaskCard
               task={task}
               onEdit={() => setSelectedTask(task)}
-              onToggleComplete={() => {/* handle toggle */ }}
+              onToggleComplete={() => {
+                /* handle toggle */
+              }}
               onCategoryClick={handleCategoryClick}
               onPriorityClick={handlePriorityClick}
               onRecurringClick={handleRecurringClick}
@@ -157,37 +166,42 @@ const shownTasks = tasks.filter(task => {
         />
       )}
       {/* Modal for viewing tasks by label */}
-      <Modal show={showLabelFilterModal} onHide={() => setShowLabelFilterModal(false)}>
-  <Modal.Header closeButton>
-    <Modal.Title>
-      Showing tasks by filter:
-      {" " + (labelFilter.colour || labelFilter.priority || labelFilter.recurringDay)?.toUpperCase()}
-    </Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {shownTasks.length > 0 ? (
-      shownTasks.map(task => (
-        <TaskCard
-          key={task.taskID}
-          task={task}
-          onEdit={() => setSelectedTask(task)}
-          onCategoryClick={handleCategoryClick}
-          onPriorityClick={handlePriorityClick}
-          onRecurringClick={handleRecurringClick}
-        />
-      ))
-    ) : (
-      <p>No tasks with this label.</p>
-    )}
-  </Modal.Body>
-</Modal>
+      <Modal
+        show={showLabelFilterModal}
+        onHide={() => setShowLabelFilterModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Showing tasks by filter:
+            {" " +
+              (
+                labelFilter.colour ||
+                labelFilter.priority ||
+                labelFilter.recurringDay
+              )?.toUpperCase()}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {shownTasks.length > 0 ? (
+            shownTasks.map((task) => (
+              <TaskCard
+                key={task.taskID}
+                task={task}
+                onEdit={() => setSelectedTask(task)}
+                onCategoryClick={handleCategoryClick}
+                onPriorityClick={handlePriorityClick}
+                onRecurringClick={handleRecurringClick}
+              />
+            ))
+          ) : (
+            <p>No tasks with this label.</p>
+          )}
+        </Modal.Body>
+      </Modal>
 
       <CreateTaskButton />
-
     </Container>
-
   );
-
 };
 
 export default Tasks;

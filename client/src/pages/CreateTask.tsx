@@ -1,11 +1,10 @@
 import { useState } from "react"; // for managing form input state
-import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup, 
+import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup,
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
 import { doc, setDoc } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
-import InstallButton from "../components/InstallButton";
 
 function CreateTask() {
   const { currentUser } = useAuth();
@@ -23,7 +22,7 @@ function CreateTask() {
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
   const [colour, setColour] = useState("");
- // const [showColours, setShowColours] = useState(false);
+  // const [showColours, setShowColours] = useState(false);
 
   const colours = [
     { name: "Red", value: "red" },
