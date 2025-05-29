@@ -27,6 +27,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [nested, setNested] = useState(false);
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
@@ -42,6 +43,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setCompleted(task.completed ?? false);
       setColour(task.colour ?? "");
       setIsEditing(false); // Start in view mode
+      setNested(task.nested ?? false);
     } else {
       setTaskName("");
       setTaskDescription("");
@@ -54,6 +56,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setCompleted(false);
       setColour("");
       setIsEditing(true); // Start in form mode for new task
+      setNested(false);
     }
   }, [task, show]);
 
@@ -133,6 +136,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         recurringDay,
         completed,
         colour,
+        nested,
       });
     } else {
       // Create new task
@@ -150,6 +154,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         ...(duration && { duration }),
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
+        ...(nested && { nested })
       });
     }
 
@@ -287,7 +292,13 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
               onChange={(e) => setCompleted(e.target.checked)}
               className="mb-3"
             />
-
+            <Form.Check
+              type="checkbox"
+              label="Nested"
+              checked={nested}
+              onChange={(e) => setNested(e.target.checked)}
+              className="mb-3"
+            />
             <Form.Check
               type="checkbox"
               label="Recurring"

@@ -14,6 +14,7 @@ export interface Task {
   duration?: number;         // Optional (minutes)
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
+  nested?: boolean;         //Optional, is a boolean thing for if it needs to be nested or not
 }
 
 export interface Category {
