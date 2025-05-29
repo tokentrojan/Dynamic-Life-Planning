@@ -52,7 +52,7 @@ function TaskCard({
   const getTaskColour = (colour?: string) => {
     switch (colour) {
       case "cat1":
-        return "primary";
+        return "danger";
       case "cat2":
         return "primary";
       case "cat3":
