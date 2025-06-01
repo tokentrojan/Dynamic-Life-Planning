@@ -75,7 +75,6 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     warning: "🟡",
     secondary: "⚪",
     dark: "⚫",
-    light: "◻️",
   };
 
   const getColourBadgeColor = (catKey?: string) =>
