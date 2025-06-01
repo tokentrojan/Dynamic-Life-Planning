@@ -25,7 +25,6 @@ const DEFAULT_LABELS: Record<string, string> = {
   cat4: "Yellow",
   cat5: "Grey",
   cat6: "Black",
-  cat7: "None",
 };
 
 const categoryColorMap: Record<string, string> = {
@@ -35,7 +34,6 @@ const categoryColorMap: Record<string, string> = {
   cat4: "warning",
   cat5: "secondary",
   cat6: "dark",
-  cat7: "light",
 };
 
 // Map badge variants to emojis
@@ -46,7 +44,6 @@ const variantEmojiMap: Record<string, string> = {
   warning: "🟡",
   secondary: "⚪",
   dark: "⚫",
-  light: "◻️",
 };
 
 type Field = { key: string; label: string };
