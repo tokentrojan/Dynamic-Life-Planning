@@ -95,6 +95,7 @@ export default function CategoryManager() {
       fields.forEach((f) => (updateMap[f.key] = f.label));
       await updateDoc(ref, updateMap);
       alert("Categories saved!");
+      window.location.reload();
     } catch (e: any) {
       console.error("Error saving categories", e);
       setError(e.message || "Failed to save categories");
