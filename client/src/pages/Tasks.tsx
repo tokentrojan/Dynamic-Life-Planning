@@ -6,7 +6,6 @@ import TaskModal from "../components/TaskModal"; // Modal to view/edit a task
 import { Task } from "../types/Task"; // Task type definition
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
-import CategoryManager from "../components/CategoryManager";
 
 const Tasks = () => {
   // Load tasks from Firestore
