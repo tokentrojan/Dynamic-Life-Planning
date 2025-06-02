@@ -28,6 +28,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
   const [nested, setNested] = useState(false);
+  const [parent, setParent] = useState<number | "">("");
+  const [child, setChild] = useState<number | "">("");
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
@@ -44,6 +46,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setColour(task.colour ?? "");
       setIsEditing(false); // Start in view mode
       setNested(task.nested ?? false);
+      setChild(task.child ?? "");
+      setParent(task.parent ?? "");
     } else {
       setTaskName("");
       setTaskDescription("");
@@ -57,6 +61,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setColour("");
       setIsEditing(true); // Start in form mode for new task
       setNested(false);
+      setChild("");
+      setParent("");
     }
   }, [task, show]);
 
@@ -137,6 +143,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         completed,
         colour,
         nested,
+        parent,
+        child,
       });
     } else {
       // Create new task
@@ -154,7 +162,9 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         ...(duration && { duration }),
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
-        ...(nested && { nested })
+        ...(nested && { nested }),
+        ...(child && { child }),
+        ...(parent && { parent }),
       });
     }
 

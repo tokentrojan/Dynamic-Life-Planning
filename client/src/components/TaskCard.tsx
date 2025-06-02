@@ -11,6 +11,7 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
+  addChild?: (label: string) => void;
   // categories?: { [key: string]: string };
 }
 
@@ -20,6 +21,7 @@ function TaskCard({
   onCategoryClick,
   onPriorityClick,
   onRecurringClick,
+  addChild,
 }: Props) {
   // fetch the user's category labels once
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
@@ -168,6 +170,7 @@ function TaskCard({
             Edit
           </Button>
         )}
+        <Button variant="primary" size="sm" onClick={addChild}>Add Nested Task</Button>
       </Card.Body>
     </Card>
   );

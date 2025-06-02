@@ -15,6 +15,8 @@ export interface Task {
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
   nested?: boolean;         //Optional, is a boolean thing for if it needs to be nested or not
+  parent?: number;          //number value for the parent task
+  child?: number;           //number value for the child task
 }
 
 export interface Category {
