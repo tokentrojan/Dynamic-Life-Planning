@@ -55,6 +55,13 @@ const Tasks = () => {
 
   // UI state to track which task (if any) is currently opened in a modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [creatingSubtaskFor, setCreatingSubtaskFor] = useState<string | null>(null);
+
+  const handleAddSubtask = (parentID: string) => {
+    setCreatingSubtaskFor(parentID);
+    setSelectedTask(null);  // open modal in "create" mode
+  };
+
 
   // Toggle a filter checkbox (sorted, unsorted, completed)
   const handleFilterToggle = (key: keyof typeof filters) => {
@@ -86,6 +93,7 @@ const Tasks = () => {
       // Sort by due date
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });
+
 
   return (
     <Container className="mt-4">
@@ -153,6 +161,7 @@ const Tasks = () => {
               onCategoryClick={handleCategoryClick}
               onPriorityClick={handlePriorityClick}
               onRecurringClick={handleRecurringClick}
+              onAddSubtask={handleAddSubtask}
             />
           </div>
         ))
@@ -166,6 +175,14 @@ const Tasks = () => {
           onClose={() => setSelectedTask(null)} // Close modal
         />
       )}
+      {creatingSubtaskFor && (
+        <TaskModal
+          parentID={creatingSubtaskFor}   // Pass the parent task ID
+          show={true}
+          onClose={() => setCreatingSubtaskFor(null)}
+        />
+      )}
+
       {/* Modal for viewing tasks by label */}
       <Modal
         show={showLabelFilterModal}

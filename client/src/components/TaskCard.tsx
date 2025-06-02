@@ -1,5 +1,5 @@
 import { Card, Badge, Button } from "react-bootstrap";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; //React,
 import { Task } from "../types/Task";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,15 +11,17 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
+  onAddSubtask?: (parentID: string) => void;
   // categories?: { [key: string]: string };
 }
 
 function TaskCard({
   task,
   onEdit,
-  onCategoryClick,
+  //onCategoryClick,
   onPriorityClick,
   onRecurringClick,
+  onAddSubtask,
 }: Props) {
   // fetch the user's category labels once
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
@@ -168,6 +170,17 @@ function TaskCard({
             Edit
           </Button>
         )}
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();  // prevent triggering card click
+            onAddSubtask?.(task.taskID);
+          }}
+        >
+          Add Subtask
+        </Button>
+
       </Card.Body>
     </Card>
   );
