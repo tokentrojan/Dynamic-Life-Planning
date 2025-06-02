@@ -10,7 +10,6 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Planner from "./pages/Planner";
 import Tasks from "./pages/Tasks";
-import CreateTask from "./pages/CreateTask";
 import Settings from "./pages/Settings";
 import { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
@@ -48,10 +47,6 @@ function AppContent() {
           <Route
             path="/tasks"
             element={isAuthenticated ? <Tasks /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/create"
-            element={isAuthenticated ? <CreateTask /> : <Navigate to="/login" />}
           />
           <Route
             path="/settings"

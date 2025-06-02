@@ -14,6 +14,7 @@ export interface Task {
   duration?: number;         // Optional (minutes)
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
+  completedDate?: string;
 }
 
 export interface Category {

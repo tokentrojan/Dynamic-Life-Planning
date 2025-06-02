@@ -42,8 +42,8 @@ const Tasks = () => {
     setLabelFilter({});
     setShowLabelFilterModal(false);
     // Optionally reset sort too:
-    // setSortField('dueDate');
-    // setSortOrderAsc(true);
+    setSortField('dueDate');
+    setSortOrderAsc(true);
   };
 
   const shownTasks = tasks.filter((task) => {
@@ -55,20 +55,34 @@ const Tasks = () => {
   });
 
   // Sorting state
-  const [sortField, setSortField] = useState<'priority' | 'dueDate' | 'doDate' | 'duration' | 'colour'>('dueDate');
+  const [sortField, setSortField] = useState<'priority' | 'dueDate' | 'doDate' | 'duration' | 'colour'| 'completedDate'>('dueDate');
   const [sortOrderAsc, setSortOrderAsc] = useState(true);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   const handleFilterToggle = (key: keyof typeof filters) => {
-    setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+    setFilters((prev) => {
+      if (key === 'completed') {
+        const newCompleted = !prev.completed;
+        return {
+          sorted: !newCompleted,
+          unsorted: !newCompleted,
+          completed: newCompleted,
+        };
+      }
 
+      // If sorted or unsorted are toggled, disable completed
+      return {
+        ...prev,
+        [key]: !prev[key],
+        completed: false,
+      };
+    });
+  };
   const isSorted = (task: Task) => task.priority && !task.completed;
   const isUnsorted = (task: Task) => !task.priority && !task.completed;
   const isCompleted = (task: Task) => task.completed;
 
-  // Apply filters
   const filteredTasks = tasks.filter((task) => {
     return (
       (filters.sorted && isSorted(task)) ||
@@ -104,6 +118,11 @@ const Tasks = () => {
 
       if (typeof aVal === 'string' && typeof bVal === 'string') {
         return sortOrderAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+
+      if (sortField === 'completedDate') {
+        aVal = a.completedDate ? new Date(a.completedDate).getTime() : 0;
+        bVal = b.completedDate ? new Date(b.completedDate).getTime() : 0;
       }
 
       return sortOrderAsc ? aVal - bVal : bVal - aVal;
@@ -163,6 +182,7 @@ const Tasks = () => {
           <option value="doDate">Do Date</option>
           <option value="duration">Duration</option>
           <option value="colour">Colour</option>
+          {filters.completed && <option value="completedDate">Completed Date</option>}
         </Form.Select>
 
         <Button

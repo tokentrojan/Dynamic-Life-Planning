@@ -121,7 +121,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
     if (isEditing && task) {
       // Update existing task
       const ref = doc(db, "users", userID, "tasks", task.taskID);
-      await updateDoc(ref, {
+
+      const updates: any = {
         taskName,
         taskDescription,
         dueDate,
@@ -132,11 +133,22 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         recurringDay,
         completed,
         colour,
-      });
+      };
+
+      // Only add completedDate if being marked complete now
+      if (completed && !task.completed) {
+        updates.completedDate = new Date().toISOString();
+      } else if (!completed) {
+        updates.completedDate = null;
+      }
+
+      await updateDoc(ref, updates);
+
     } else {
       // Create new task
       const taskID = uuid();
       const ref = doc(db, "users", userID, "tasks", taskID);
+
       await setDoc(ref, {
         userID,
         taskID,
@@ -145,6 +157,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         dueDate,
         ...(doDate && { doDate }),
         completed,
+        ...(completed && { completedDate: new Date().toISOString() }), // Add completedDate if task starts completed
         ...(priority && { priority }),
         ...(duration && { duration }),
         ...(recurring && { recurring: true, recurringDay }),

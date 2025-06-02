@@ -163,6 +163,11 @@ function TaskCard({
             </Badge>
           )}
         </Card.Text>
+        {task.completed && task.completedDate && (
+          <div className="text-muted small mt-1">
+            Completed on: {new Date(task.completedDate).toLocaleDateString('en-GB')}
+          </div>
+        )}
         {onEdit && (
           <Button variant="primary" size="sm" onClick={onEdit}>
             Edit
