@@ -1,0 +1,111 @@
+/* Ensure theme persists on page load */
+html {
+    background-color: var(--bg-color, #ffffff);
+  }
+  
+  /* Theme CSS Variables */
+  :root {
+    --bg-color: #ffffff; /* Default background color */
+  }
+  
+  /* Ensure body and html use the theme */
+  html, body {
+    background-color: var(--bg-color);
+    transition: background-color 0.3s ease;
+  }
+  
+  /* Optional: Make cards and modals slightly transparent to show background */
+  .card {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+  
+  .modal-content {
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+  
+  /* CALENDAR DARK THEME FIXES */
+  /* Target dark backgrounds specifically */
+  div[style*="#1a1a1a"] .rbc-calendar,
+  div[style*="#0d1117"] .rbc-calendar,
+  div[style*="#000000"] .rbc-calendar {
+    color: white !important;
+  }
+  
+  /* Calendar toolbar */
+  div[style*="#1a1a1a"] .rbc-toolbar,
+  div[style*="#0d1117"] .rbc-toolbar,
+  div[style*="#000000"] .rbc-toolbar {
+    color: white !important;
+  }
+  
+  div[style*="#1a1a1a"] .rbc-toolbar button,
+  div[style*="#0d1117"] .rbc-toolbar button,
+  div[style*="#000000"] .rbc-toolbar button {
+    background-color: #444 !important;
+    color: white !important;
+    border-color: #666 !important;
+  }
+  
+  /* Calendar headers */
+  div[style*="#1a1a1a"] .rbc-header,
+  div[style*="#0d1117"] .rbc-header,
+  div[style*="#000000"] .rbc-header {
+    background-color: #333 !important;
+    color: white !important;
+    border-color: #555 !important;
+  }
+  
+  /* Time labels */
+  div[style*="#1a1a1a"] .rbc-label,
+  div[style*="#0d1117"] .rbc-label,
+  div[style*="#000000"] .rbc-label {
+    color: white !important;
+  }
+  
+  /* All calendar text */
+  div[style*="#1a1a1a"] .rbc-calendar *,
+  div[style*="#0d1117"] .rbc-calendar *,
+  div[style*="#000000"] .rbc-calendar * {
+    color: white !important;
+  }
+  
+  /* Page headings */
+  div[style*="#1a1a1a"] h1,
+  div[style*="#1a1a1a"] h2,
+  div[style*="#1a1a1a"] h3,
+  div[style*="#0d1117"] h1,
+  div[style*="#0d1117"] h2,
+  div[style*="#0d1117"] h3,
+  div[style*="#000000"] h1,
+  div[style*="#000000"] h2,
+  div[style*="#000000"] h3 {
+    color: white !important;
+  }
+  
+  /* Dark theme cards */
+  div[style*="#1a1a1a"] .card,
+  div[style*="#0d1117"] .card,
+  div[style*="#000000"] .card {
+    background-color: rgba(50, 50, 50, 0.9) !important;
+    color: white !important;
+  }
+  
+  /* Dark theme modals */
+  div[style*="#1a1a1a"] .modal-content,
+  div[style*="#0d1117"] .modal-content,
+  div[style*="#000000"] .modal-content {
+    background-color: rgba(50, 50, 50, 0.95) !important;
+    color: white !important;
+  }
+  
+  /* Dark theme forms */
+  div[style*="#1a1a1a"] .form-control,
+  div[style*="#1a1a1a"] .form-select,
+  div[style*="#0d1117"] .form-control,
+  div[style*="#0d1117"] .form-select,
+  div[style*="#000000"] .form-control,
+  div[style*="#000000"] .form-select {
+    background-color: #333 !important;
+    color: white !important;
+    border-color: #555 !important;
+  }

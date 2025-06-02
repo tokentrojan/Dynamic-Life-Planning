@@ -6,7 +6,6 @@ import TaskModal from "../components/TaskModal";
 import { Task } from "../types/Task";
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
-import CategoryManager from "../components/CategoryManager";
 
 const Tasks = () => {
   const tasks = useTasks();
