@@ -1,18 +1,17 @@
-import { Container, Form, Row, Col, Modal } from "react-bootstrap";
+import { Container, Form, Row, Col, Modal, Button } from "react-bootstrap";
 import { useState } from "react";
-import { useTasks } from "../data/firebasetasks"; // Custom hook to load tasks from Firestore
-import TaskCard from "../components/TaskCard"; // Reusable card to show a task
-import TaskModal from "../components/TaskModal"; // Modal to view/edit a task
-import { Task } from "../types/Task"; // Task type definition
+import { useTasks } from "../data/firebasetasks";
+import TaskCard from "../components/TaskCard";
+import TaskModal from "../components/TaskModal";
+import { Task } from "../types/Task";
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
 import CategoryManager from "../components/CategoryManager";
 
 const Tasks = () => {
-  // Load tasks from Firestore
   const tasks = useTasks();
 
-  // UI state for which task filters are active
+  // Filter state
   const [filters, setFilters] = useState({
     sorted: true,
     unsorted: true,
@@ -30,7 +29,6 @@ const Tasks = () => {
     setLabelFilter({ colour: label });
     setShowLabelFilterModal(true);
   };
-
   const handlePriorityClick = (label: string) => {
     setLabelFilter({ priority: label });
     setShowLabelFilterModal(true);
@@ -40,59 +38,86 @@ const Tasks = () => {
     setShowLabelFilterModal(true);
   };
 
+  const clearAllFilters = () => {
+    setFilters({ sorted: true, unsorted: true, completed: false });
+    setLabelFilter({});
+    setShowLabelFilterModal(false);
+    // Optionally reset sort too:
+    // setSortField('dueDate');
+    // setSortOrderAsc(true);
+  };
+
   const shownTasks = tasks.filter((task) => {
     return (
       (!labelFilter.colour || task.colour === labelFilter.colour) &&
       (!labelFilter.priority || task.priority === labelFilter.priority) &&
-      (!labelFilter.recurringDay ||
-        task.recurringDay === labelFilter.recurringDay)
+      (!labelFilter.recurringDay || task.recurringDay === labelFilter.recurringDay)
     );
   });
 
-  // UI state for how tasks should be sorted
-  const [sortMethod, setSortMethod] = useState<"priority" | "dueDate">(
-    "priority"
-  );
+  // Sorting state
+  const [sortField, setSortField] = useState<'priority' | 'dueDate' | 'doDate' | 'duration' | 'colour'>('dueDate');
+  const [sortOrderAsc, setSortOrderAsc] = useState(true);
 
-  // UI state to track which task (if any) is currently opened in a modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-  // Toggle a filter checkbox (sorted, unsorted, completed)
   const handleFilterToggle = (key: keyof typeof filters) => {
     setFilters((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Filter logic helpers
   const isSorted = (task: Task) => task.priority && !task.completed;
   const isUnsorted = (task: Task) => !task.priority && !task.completed;
   const isCompleted = (task: Task) => task.completed;
 
-  // Apply filters and sorting to the task list
-  const filteredTasks = tasks
-    .filter((task) => {
-      return (
-        (filters.sorted && isSorted(task)) ||
-        (filters.unsorted && isUnsorted(task)) ||
-        (filters.completed && isCompleted(task))
-      );
-    })
-    .sort((a, b) => {
-      if (sortMethod === "priority") {
-        const order = { high: 1, medium: 2, low: 3 };
-        const aPriority = a.priority ?? "low";
-        const bPriority = b.priority ?? "low";
-        return (order[aPriority] ?? 4) - (order[bPriority] ?? 4);
+  // Apply filters
+  const filteredTasks = tasks.filter((task) => {
+    return (
+      (filters.sorted && isSorted(task)) ||
+      (filters.unsorted && isUnsorted(task)) ||
+      (filters.completed && isCompleted(task))
+    );
+  });
+
+  // Apply sorting based on selected field and order
+  const getSortedTasks = () => {
+    const sorted = [...filteredTasks].sort((a, b) => {
+      let aVal: any = a[sortField];
+      let bVal: any = b[sortField];
+
+      // Handle missing values
+      if (aVal === undefined) return 1;
+      if (bVal === undefined) return -1;
+
+      // Handle special cases
+      if (sortField === 'priority') {
+        const map: Record<string, number> = { high: 3, medium: 2, low: 1 };
+        aVal = map[aVal] || 0;
+        bVal = map[bVal] || 0;
       }
 
-      // Sort by due date
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (sortField === 'doDate') {
+        aVal = a.doDate ? new Date(a.doDate).getTime() : new Date(a.dueDate).getTime();
+        bVal = b.doDate ? new Date(b.doDate).getTime() : new Date(b.dueDate).getTime();
+      } else if (sortField === 'dueDate') {
+        aVal = new Date(a.dueDate).getTime();
+        bVal = new Date(b.dueDate).getTime();
+      }
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortOrderAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+
+      return sortOrderAsc ? aVal - bVal : bVal - aVal;
     });
+
+    return sorted;
+  };
 
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Tasks</h2>
 
-      {/* Filter checkboxes: sorted, unsorted, completed */}
+      {/* Filter checkboxes */}
       <Form className="mb-3">
         <Row>
           <Col xs={12} md={4}>
@@ -119,27 +144,42 @@ const Tasks = () => {
               onChange={() => handleFilterToggle("completed")}
             />
           </Col>
+          <Button variant="outline-danger" onClick={clearAllFilters} className="mt-2">
+            Clear All Filters
+          </Button>
         </Row>
       </Form>
 
-      {/* Sort method dropdown: Priority or Due Date */}
-      <Form.Group controlId="sortMethod" className="mb-4">
-        <Form.Label>Sort by:</Form.Label>
+      {/* Sort field and order controls */}
+      <Form.Group className="mb-4">
+      <Form.Label>Sort Options</Form.Label>
+      <div className="d-flex flex-wrap align-items-end gap-2">
         <Form.Select
-          value={sortMethod}
-          onChange={(e) =>
-            setSortMethod(e.target.value as "priority" | "dueDate")
-          }
+          value={sortField}
+          onChange={(e) => setSortField(e.target.value as any)}
+          style={{ minWidth: "200px" }}
         >
           <option value="priority">Priority</option>
           <option value="dueDate">Due Date</option>
+          <option value="doDate">Do Date</option>
+          <option value="duration">Duration</option>
+          <option value="colour">Colour</option>
         </Form.Select>
-      </Form.Group>
 
-      {filteredTasks.length === 0 ? (
+        <Button
+          variant="outline-secondary"
+          onClick={() => setSortOrderAsc(!sortOrderAsc)}
+        >
+          {sortOrderAsc ? '⬆ Asc' : '⬇ Desc'}
+        </Button>
+      </div>
+    </Form.Group>
+
+      {/* Render tasks */}
+      {getSortedTasks().length === 0 ? (
         <p>No tasks match the selected filters.</p>
       ) : (
-        filteredTasks.map((task) => (
+        getSortedTasks().map((task) => (
           <div
             key={task.taskID}
             onClick={() => setSelectedTask(task)}
@@ -148,9 +188,7 @@ const Tasks = () => {
             <TaskCard
               task={task}
               onEdit={() => setSelectedTask(task)}
-              onToggleComplete={() => {
-                /* handle toggle */
-              }}
+              onToggleComplete={() => {}}
               onCategoryClick={handleCategoryClick}
               onPriorityClick={handlePriorityClick}
               onRecurringClick={handleRecurringClick}
@@ -159,28 +197,21 @@ const Tasks = () => {
         ))
       )}
 
-      {/* Task modal for viewing/editing a single task */}
+      {/* Task detail modal */}
       {selectedTask && (
         <TaskModal
           task={selectedTask}
           show={true}
-          onClose={() => setSelectedTask(null)} // Close modal
+          onClose={() => setSelectedTask(null)}
         />
       )}
-      {/* Modal for viewing tasks by label */}
-      <Modal
-        show={showLabelFilterModal}
-        onHide={() => setShowLabelFilterModal(false)}
-      >
+
+      {/* Filtered label modal */}
+      <Modal show={showLabelFilterModal} onHide={() => setShowLabelFilterModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
             Showing tasks by filter:
-            {" " +
-              (
-                labelFilter.colour ||
-                labelFilter.priority ||
-                labelFilter.recurringDay
-              )?.toUpperCase()}
+            {" " + (labelFilter.colour || labelFilter.priority || labelFilter.recurringDay)?.toUpperCase()}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
