@@ -49,7 +49,13 @@ function AppNavbar() {
             {/* Right-Side of NavBar */}
             <Nav className="ms-auto">
               <NavDropdown title="Account" id="account-dropdown" align="end">
-                <NavDropdown.Item onClick={handleLogoutClick}>Logout</NavDropdown.Item>
+                <NavDropdown.Item as={NavLink} to="/settings">
+                  Settings
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={handleLogoutClick}>
+                  Logout
+                </NavDropdown.Item>
               </NavDropdown>
             </Nav>
           </Navbar.Collapse>
