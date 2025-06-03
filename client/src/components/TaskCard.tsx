@@ -12,6 +12,10 @@ interface Props {
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
   onAddSubtask?: (parentID: string) => void;
+  expandToggle?: React.ReactNode;
+  expandedTasks?: Record<string, boolean>;
+  onToggleExpand?: (taskID: string) => void;
+  hasSubtasks?: boolean;
   // categories?: { [key: string]: string };
 }
 
@@ -22,6 +26,9 @@ function TaskCard({
   onPriorityClick,
   onRecurringClick,
   onAddSubtask,
+  expandedTasks = {},
+  onToggleExpand,
+  hasSubtasks,
 }: Props) {
   // fetch the user's category labels once
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
@@ -83,11 +90,11 @@ function TaskCard({
     return `${day}/${month}/${year} ${time}`;
   };
 
-  // const isPastDue = new Date(task.dueDate) < new Date();
   const isCompleted = task.completed;
+  const isExpanded = expandedTasks?.[task.taskID] ?? false;
 
   return (
-    <Card className="mb-3 shadow-sm">
+    <Card className="shadow-sm" style={{ marginBottom: 0 }}>
       <Card.Body>
         <Card.Title>{task.taskName}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">
@@ -171,7 +178,7 @@ function TaskCard({
           </Button>
         )}
         <Button
-          variant="outline-secondary"
+          variant="primary"
           size="sm"
           onClick={(e) => {
             e.stopPropagation();  // prevent triggering card click
@@ -179,6 +186,19 @@ function TaskCard({
           }}
         >
           Add Subtask
+        </Button>
+
+        {/* Expand/collapse child tasks */}
+        <Button onClick={(e) => {
+          e.stopPropagation();
+          if (onToggleExpand && hasSubtasks) onToggleExpand(task.taskID);
+        }}
+          disabled={!hasSubtasks}
+          style={{
+            opacity: hasSubtasks ? 1 : 0.5,
+            cursor: hasSubtasks ? "pointer" : "default",
+          }}>
+          {isExpanded ? "Collapse" : "Expand"}
         </Button>
 
       </Card.Body>
