@@ -55,6 +55,13 @@ const Tasks = () => {
 
   // UI state to track which task (if any) is currently opened in a modal
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [creatingSubtaskFor, setCreatingSubtaskFor] = useState<string | null>(null);
+
+  const handleAddSubtask = (parentID: string) => {
+    setCreatingSubtaskFor(parentID);
+    setSelectedTask(null);  // open modal in "create" mode
+  };
+
 
   // Toggle a filter checkbox (sorted, unsorted, completed)
   const handleFilterToggle = (key: keyof typeof filters) => {
@@ -86,6 +93,53 @@ const Tasks = () => {
       // Sort by due date
       return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
     });
+
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+  const toggleExpanded = (taskID: string) => {
+    setExpandedTasks(prev => {
+      const newState = {
+        ...prev,
+        [taskID]: !prev[taskID],
+      };
+      return newState;
+    });
+  };
+
+
+  const renderTaskWithSubtasks = (task: Task, level = 0) => {
+    const subtasks = filteredTasks.filter(t => t.parentID === task.taskID);
+    const isExpanded = expandedTasks[task.taskID] ?? false;
+    const hasSubtasks = subtasks.length > 0; //true if there are subtasks
+
+    return (
+      <div key={task.taskID} style={{
+        paddingLeft: level * 20,
+        marginBottom: level === 0 ? 20 : 0, // Space only between top-level tasks
+      }}>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <div
+            style={{ flex: 1, cursor: "pointer" }}
+            onClick={() => setSelectedTask(task)}
+          >
+            <TaskCard
+              task={task}
+              onEdit={() => setSelectedTask(task)}
+              onCategoryClick={handleCategoryClick}
+              onPriorityClick={handlePriorityClick}
+              onRecurringClick={handleRecurringClick}
+              onAddSubtask={handleAddSubtask}
+              expandedTasks={expandedTasks}
+              onToggleExpand={toggleExpanded}
+              hasSubtasks={hasSubtasks}
+            />
+          </div>
+        </div>
+        {isExpanded && subtasks.map(subtask => renderTaskWithSubtasks(subtask, level + 1))}
+      </div>
+    );
+  };
+
+
 
   return (
     <Container className="mt-4">
@@ -138,25 +192,11 @@ const Tasks = () => {
       {filteredTasks.length === 0 ? (
         <p>No tasks match the selected filters.</p>
       ) : (
-        filteredTasks.map((task) => (
-          <div
-            key={task.taskID}
-            onClick={() => setSelectedTask(task)}
-            style={{ cursor: "pointer" }}
-          >
-            <TaskCard
-              task={task}
-              onEdit={() => setSelectedTask(task)}
-              onToggleComplete={() => {
-                /* handle toggle */
-              }}
-              onCategoryClick={handleCategoryClick}
-              onPriorityClick={handlePriorityClick}
-              onRecurringClick={handleRecurringClick}
-            />
-          </div>
-        ))
+        filteredTasks
+          .filter(task => !task.parentID) // only top-level tasks
+          .map(task => renderTaskWithSubtasks(task))
       )}
+
 
       {/* Task modal for viewing/editing a single task */}
       {selectedTask && (
@@ -166,6 +206,14 @@ const Tasks = () => {
           onClose={() => setSelectedTask(null)} // Close modal
         />
       )}
+      {creatingSubtaskFor && (
+        <TaskModal
+          parentID={creatingSubtaskFor}   // Pass the parent task ID
+          show={true}
+          onClose={() => setCreatingSubtaskFor(null)}
+        />
+      )}
+
       {/* Modal for viewing tasks by label */}
       <Modal
         show={showLabelFilterModal}

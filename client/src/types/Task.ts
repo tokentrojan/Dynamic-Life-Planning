@@ -1,5 +1,5 @@
 export type Priority = 'low' | 'medium' | 'high';
-export type Colour = 'red' | 'blue' | 'green' | 'yellow'| 'black' | 'grey';
+export type Colour = 'red' | 'blue' | 'green' | 'yellow' | 'black' | 'grey';
 
 export interface Task {
   userID: string;            // UID from Firebase Auth
@@ -14,10 +14,13 @@ export interface Task {
   duration?: number;         // Optional (minutes)
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
+  nested?: boolean;         //Optional, is a boolean thing for if it needs to be nested or not
+  parentID?: string;        //id for the parent task
+  children?: Task[];        //array to hold any child tasks
 }
 
 export interface Category {
-  
+
   color: Colour;       // 'red', 'blue', etc.
   label: string;       // 'Red', or renamed like 'Studying'
   userID: string;

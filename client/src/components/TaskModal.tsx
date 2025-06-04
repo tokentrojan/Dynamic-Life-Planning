@@ -9,9 +9,10 @@ interface TaskModalProps {
   task?: Task;
   show: boolean;
   onClose: () => void;
+  parentID?: string | null;
 }
 
-function TaskModal({ task, show, onClose }: TaskModalProps) {
+function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const isExistingTask = !!task; // true if editing/viewing, false if creating
   const [isEditing, setIsEditing] = useState(!task); // if no task, we're creating
 
@@ -27,6 +28,7 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [nested, setNested] = useState(false);
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
@@ -42,6 +44,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setCompleted(task.completed ?? false);
       setColour(task.colour ?? "");
       setIsEditing(false); // Start in view mode
+      setNested(task.nested ?? false);
+
     } else {
       setTaskName("");
       setTaskDescription("");
@@ -54,6 +58,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
       setCompleted(false);
       setColour("");
       setIsEditing(true); // Start in form mode for new task
+      setNested(false);
+
     }
   }, [task, show]);
 
@@ -132,6 +138,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         recurringDay,
         completed,
         colour,
+        nested,
+        ...(parentID && {parentID}),
       });
     } else {
       // Create new task
@@ -149,6 +157,8 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
         ...(duration && { duration }),
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
+        ...(nested && { nested }),
+        ...(parentID && { parentID }),
       });
     }
 
@@ -284,6 +294,14 @@ function TaskModal({ task, show, onClose }: TaskModalProps) {
               label="Completed"
               checked={completed}
               onChange={(e) => setCompleted(e.target.checked)}
+              className="mb-3"
+            />
+
+            <Form.Check
+              type="checkbox"
+              label="Nested"
+              checked={nested}
+              onChange={(e) => setNested(e.target.checked)}
               className="mb-3"
             />
 
