@@ -1,5 +1,5 @@
 import { Card, Badge, Button } from "react-bootstrap";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Task } from "../types/Task";
 import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,7 +11,10 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
-  // categories?: { [key: string]: string };
+  onAddSubtask?: (parentID: string) => void; 
+  expandedTasks?: Record<string, boolean>;   
+  onToggleExpand?: (taskID: string) => void; 
+  hasSubtasks?: boolean;                     
 }
 
 function TaskCard({
@@ -20,9 +23,13 @@ function TaskCard({
   onCategoryClick,
   onPriorityClick,
   onRecurringClick,
+  onAddSubtask,
+  expandedTasks = {},
+  onToggleExpand,
+  hasSubtasks,
 }: Props) {
-  // fetch the user's category labels once
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     async function loadCats() {
       const uid = auth.currentUser?.uid;
@@ -38,34 +45,22 @@ function TaskCard({
 
   const getBadgeColor = (priority?: string) => {
     switch (priority) {
-      case "high":
-        return "danger";
-      case "medium":
-        return "warning";
-      case "low":
-        return "success";
-      default:
-        return "secondary";
+      case "high": return "danger";
+      case "medium": return "warning";
+      case "low": return "success";
+      default: return "secondary";
     }
   };
 
   const getTaskColour = (colour?: string) => {
     switch (colour) {
-      case "cat1":
-        return "danger";
-      case "cat2":
-        return "primary";
-      case "cat3":
-        return "success";
-      case "cat4":
-        return "warning";
-      case "cat5":
-        return "secondary";
-      case "cat6":
-        return "dark";
-
-      default:
-        return "dark";
+      case "cat1": return "danger";
+      case "cat2": return "primary";
+      case "cat3": return "success";
+      case "cat4": return "warning";
+      case "cat5": return "secondary";
+      case "cat6": return "dark";
+      default: return "dark";
     }
   };
 
@@ -81,8 +76,8 @@ function TaskCard({
     return `${day}/${month}/${year} ${time}`;
   };
 
-  // const isPastDue = new Date(task.dueDate) < new Date();
   const isCompleted = task.completed;
+  const isExpanded = expandedTasks?.[task.taskID] ?? false;
 
   return (
     <Card className="mb-3 shadow-sm">
@@ -100,25 +95,20 @@ function TaskCard({
           <br />
           {task.duration && (
             <>
-              Duration: {task.duration} min
-              <br />
+              Duration: {task.duration} min<br />
             </>
           )}
 
-          {task.colour && ( // Only render if this task has a `colour` key
+          {task.colour && (
             <>
               Category:{" "}
               <Badge
                 bg={getTaskColour(task.colour)}
                 className="me-2"
                 style={{ cursor: "pointer" }}
+                onClick={() => task.colour && onCategoryClick?.(task.colour)}
               >
-                {
-                  // Look up the human‐readable label from `categories` state (e.g. "Red")
-                  // and uppercase it; if missing, fall back to the raw key ("CAT1")
-                }
-                {categories[task.colour]?.toUpperCase() ??
-                  task.colour.toUpperCase()}
+                {categories[task.colour]?.toUpperCase() ?? task.colour.toUpperCase()}
               </Badge>
             </>
           )}
@@ -129,10 +119,7 @@ function TaskCard({
               className="me-2"
               onClick={(e) => {
                 e.stopPropagation();
-                if (task.priority) {
-                  onPriorityClick?.(task.priority); // only call if task.priority is defined
-                  console.log("priotity click");
-                }
+                task.priority && onPriorityClick?.(task.priority);
               }}
               style={{ cursor: "pointer" }}
             >
@@ -146,31 +133,59 @@ function TaskCard({
               bg="info"
               onClick={(e) => {
                 e.stopPropagation();
-                if (task.recurringDay) {
-                  // only call if task.recurringDay is defined
-                  onRecurringClick?.(task.recurringDay);
-                  console.log("recurringDay");
-                }
+                task.recurringDay && onRecurringClick?.(task.recurringDay);
               }}
               style={{ cursor: "pointer" }}
             >
               Repeats: {task.recurringDay}
             </Badge>
           )}
+
           {isCompleted && (
             <Badge bg="secondary" className="ms-2">
               Completed
             </Badge>
           )}
         </Card.Text>
+
         {task.completed && task.completedDate && (
           <div className="text-muted small mt-1">
             Completed on: {new Date(task.completedDate).toLocaleDateString('en-GB')}
           </div>
         )}
+
         {onEdit && (
           <Button variant="primary" size="sm" onClick={onEdit}>
             Edit
+          </Button>
+        )}
+
+        {onAddSubtask && (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddSubtask(task.taskID);
+            }}
+            className="ms-2"
+          >
+            Add Subtask
+          </Button>
+        )}
+
+        {onToggleExpand && (
+          <Button
+            variant="light"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (hasSubtasks) onToggleExpand(task.taskID);
+            }}
+            disabled={!hasSubtasks}
+            className="ms-2"
+          >
+            {isExpanded ? "Collapse" : "Expand"}
           </Button>
         )}
       </Card.Body>
