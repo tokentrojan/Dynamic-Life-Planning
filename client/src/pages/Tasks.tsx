@@ -150,38 +150,36 @@ const Tasks = () => {
   };
 
 
-  const renderTaskWithSubtasks = (task: Task, level = 0) => {
-    const subtasks = filteredTasks.filter(t => t.parentID === task.taskID);
-    const isExpanded = expandedTasks[task.taskID] ?? false;
-    const hasSubtasks = subtasks.length > 0; //true if there are subtasks
+  const renderTaskWithSubtasks = (task: Task, level = 0, allTasks: Task[] = filteredTasks) => {
+  const subtasks = allTasks.filter(t => t.parentID === task.taskID);
+  const isExpanded = expandedTasks[task.taskID] ?? false;
+  const hasSubtasks = subtasks.length > 0;
 
-    return (
-      <div key={task.taskID} style={{
-        paddingLeft: level * 20,
-        marginBottom: level === 0 ? 20 : 0, // Space only between top-level tasks
-      }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div
-            style={{ flex: 1, cursor: "pointer" }}
-            onClick={() => setSelectedTask(task)}
-          >
-            <TaskCard
-              task={task}
-              onEdit={() => setSelectedTask(task)}
-              onCategoryClick={handleCategoryClick}
-              onPriorityClick={handlePriorityClick}
-              onRecurringClick={handleRecurringClick}
-              onAddSubtask={handleAddSubtask}
-              expandedTasks={expandedTasks}
-              onToggleExpand={toggleExpanded}
-              hasSubtasks={hasSubtasks}
-            />
-          </div>
+  return (
+    <div key={task.taskID} style={{
+      paddingLeft: level * 20,
+      marginBottom: level === 0 ? 20 : 0,
+    }}>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ flex: 1, cursor: "pointer" }} onClick={() => setSelectedTask(task)}>
+          <TaskCard
+            task={task}
+            onEdit={() => setSelectedTask(task)}
+            onCategoryClick={handleCategoryClick}
+            onPriorityClick={handlePriorityClick}
+            onRecurringClick={handleRecurringClick}
+            onAddSubtask={handleAddSubtask}
+            expandedTasks={expandedTasks}
+            onToggleExpand={toggleExpanded}
+            hasSubtasks={hasSubtasks}
+          />
         </div>
-        {isExpanded && subtasks.map(subtask => renderTaskWithSubtasks(subtask, level + 1))}
       </div>
-    );
-  };
+
+      {isExpanded && subtasks.map(subtask => renderTaskWithSubtasks(subtask, level + 1, allTasks))}
+    </div>
+  );
+};
 
 
 
@@ -256,7 +254,7 @@ const Tasks = () => {
       ) : (
         getSortedTasks()
           .filter(task => !task.parentID)
-          .map(task => renderTaskWithSubtasks(task))
+          .map(task => renderTaskWithSubtasks(task, 0, getSortedTasks()))
       )}
       {selectedTask && (
         <TaskModal
