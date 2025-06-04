@@ -15,7 +15,6 @@ export interface Task {
   recurring?: boolean;       // Optional toggle
   recurringDay?: string;     // Optional (only if recurring is true)
   completedDate?: string;
-  nested?: boolean;         //Optional, is a boolean thing for if it needs to be nested or not
   parentID?: string;        //id for the parent task
   children?: Task[];        //array to hold any child tasks
 }

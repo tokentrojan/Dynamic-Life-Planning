@@ -11,10 +11,10 @@ interface Props {
   onCategoryClick?: (label: string) => void;
   onPriorityClick?: (label: string) => void;
   onRecurringClick?: (label: string) => void;
-  onAddSubtask?: (parentID: string) => void; 
-  expandedTasks?: Record<string, boolean>;   
-  onToggleExpand?: (taskID: string) => void; 
-  hasSubtasks?: boolean;                     
+  onAddSubtask?: (parentID: string) => void;
+  expandedTasks?: Record<string, boolean>;
+  onToggleExpand?: (taskID: string) => void;
+  hasSubtasks?: boolean;
 }
 
 function TaskCard({
@@ -80,7 +80,7 @@ function TaskCard({
   const isExpanded = expandedTasks?.[task.taskID] ?? false;
 
   return (
-    <Card className="mb-3 shadow-sm">
+    <Card className="shadow-sm" style={{ marginBottom: 0 }}>
       <Card.Body>
         <Card.Title>{task.taskName}</Card.Title>
         <Card.Subtitle className="mb-2 text-muted">
@@ -176,15 +176,17 @@ function TaskCard({
 
         {onToggleExpand && (
           <Button
-            variant="light"
+            variant="primary"
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
               if (hasSubtasks) onToggleExpand(task.taskID);
             }}
             disabled={!hasSubtasks}
-            className="ms-2"
-          >
+            style={{
+              opacity: hasSubtasks ? 1 : 0.5,
+              cursor: hasSubtasks ? "pointer" : "default",
+            }}>
             {isExpanded ? "Collapse" : "Expand"}
           </Button>
         )}
