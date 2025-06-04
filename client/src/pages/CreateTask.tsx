@@ -1,50 +1,70 @@
 import { useState } from "react"; // for managing form input state
-import { Form, Button, Container } from "react-bootstrap"; // UI components
+import { Form, Button, Container, Row, Col } from "react-bootstrap"; // UI components FormGroup,
 import { useNavigate } from "react-router-dom"; // routes for navigation redirects
 import { db } from "../firebase"; // firebase firestore tools for saving data
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, getDocs } from "firebase/firestore";
 import { useAuth } from "../AuthContext"; // porvides current User
 import { v4 as uuid } from "uuid"; // generates unique taskID for each task
+import CategoryManager from "../components/CategoryManager";
+import { Category } from "../types/Task";
 
 function CreateTask() {
-  const { currentUser } = useAuth(); //gets current User
+  const { currentUser } = useAuth();
+  const userID = currentUser?.uid || localStorage.getItem("cachedUID");
+
   const navigate = useNavigate(); //for redirection
 
   /**Form State variables for user input**/
   const [taskName, setTaskName] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [doDate, setDoDate] = useState("");
   const [priority, setPriority] = useState("");
   const [duration, setDuration] = useState<number | "">("");
   const [recurring, setRecurring] = useState(false);
   const [recurringDay, setRecurringDay] = useState("");
+  const [colour, setColour] = useState("");
+  // const [showColours, setShowColours] = useState(false);
+
+  const colours = [
+    { name: "Red", value: "red" },
+    { name: "Blue", value: "blue" },
+    { name: "Green", value: "green" },
+    { name: "Yellow", value: "yellow" },
+    { name: "Gray", value: "gray" },
+    { name: "Black", value: "black" },
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     console.log("uuid:", uuid);
     e.preventDefault();
-    if (!currentUser) return;
+    if (!userID) return;
 
     const taskID = uuid();
 
     const newTask = {
-      userID: currentUser.uid,
+      userID,
       taskID,
       taskName,
       taskDescription,
       dueDate,
+      ...(doDate && { doDate }),
+      completed: false,
       ...(priority && { priority }),
+      ...(colour && { colour }),
       ...(duration && { duration: Number(duration) }),
       ...(recurring && { recurring: true, recurringDay }),
     };
 
-    const taskRef = doc(db, "users", currentUser.uid, "tasks", taskID);
+    const taskRef = doc(db, "users", userID, "tasks", taskID);
     await setDoc(taskRef, newTask);
 
     navigate("/sorted"); // Redirect after creation
   };
 
   return (
-    <Container className="mt-4" style={{ maxWidth: 600 }}>
+    <Container className="mt-4" style={{ maxWidth: 800 }}>
+      {" "}
       <h2>Create New Task</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
@@ -60,47 +80,68 @@ function CreateTask() {
           <Form.Label>Task Description *</Form.Label>
           <Form.Control
             as="textarea"
-            rows={3}
+            rows={4}
             value={taskDescription}
             onChange={(e) => setTaskDescription(e.target.value)}
             required
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Due Date & Time *</Form.Label>
-          <Form.Control
-            type="datetime-local"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-          />
-        </Form.Group>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Due Date & Time *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                required
+              />
+            </Form.Group>
+          </Col>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Priority</Form.Label>
-          <Form.Select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-          >
-            <option value="">-- None --</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </Form.Select>
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>When are you doing this task?</Form.Label>
+            <Form.Control
+              type="datetime-local"
+              value={doDate}
+              onChange={(e) => setDoDate(e.target.value)}
+            />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Duration (minutes)</Form.Label>
-          <Form.Control
-            type="number"
-            value={duration}
-            onChange={(e) =>
-              setDuration(e.target.value === "" ? "" : Number(e.target.value))
-            }
-            min={1}
-          />
-        </Form.Group>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Priority</Form.Label>
+              <Form.Select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="">-- None --</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Duration (minutes)</Form.Label>
+              <Form.Control
+                type="number"
+                value={duration}
+                onChange={(e) =>
+                  setDuration(
+                    e.target.value === "" ? "" : Number(e.target.value)
+                  )
+                }
+                min={1}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
         <Form.Check
           type="checkbox"
@@ -128,6 +169,7 @@ function CreateTask() {
           </Form.Group>
         )}
 
+        <CategoryManager></CategoryManager>
         <Button variant="primary" type="submit">
           Create Task
         </Button>

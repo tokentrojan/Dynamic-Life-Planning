@@ -1,6 +1,7 @@
 // Import the functions you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getFirestore , enableIndexedDbPersistence } from "firebase/firestore";
 
 // Your Firebase config
 const firebaseConfig = {
@@ -13,9 +14,20 @@ const firebaseConfig = {
     measurementId: "G-HWLTDZPRJS"
   };
 
-// Initialize Firebase
+// Initiwsalize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
 export default app;
-export {auth};
+export {auth, googleProvider};
+export const db = getFirestore(app);
+
+enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code == 'failed-precondition') {
+      console.log('Persistence failed, multiple tabs open?');
+    } else if (err.code == 'unimplemented') {
+      console.log('Persistence is not available in this browser.');
+    }
+  });
