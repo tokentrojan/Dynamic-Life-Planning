@@ -7,8 +7,10 @@ export function shouldTriggerReminder(
   reminderOffsetMinutes: number,
   currentTime: string
 ): boolean {
-  
-    return false;
+  const taskTime = new Date(taskDate).getTime();
+  const now = new Date(currentTime).getTime();
+  const reminderTime = taskTime - reminderOffsetMinutes * 60 * 1000;
+  return now >= reminderTime && now < taskTime;
 }
 
 
@@ -19,7 +21,3 @@ export function shouldTriggerReminder(
 
 
 
-/*const taskTime = new Date(taskDate).getTime();
-  const now = new Date(currentTime).getTime();
-  const reminderTime = taskTime - reminderOffsetMinutes * 60 * 1000;
-  return now >= reminderTime && now < taskTime; */
