@@ -1,39 +1,45 @@
 import { useState, useRef, useEffect } from 'react';
-import { Container, Card, Form, Button, Row, Col, Nav, Alert } from 'react-bootstrap';
+import { Container, Card, Form, Button, Row, Col, Nav, Alert, Spinner } from 'react-bootstrap';
 import { useTheme } from '../ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { useUserSettings } from '../utils/userSettings';
 
 const Settings = () => {
   const { backgroundColor, setBackgroundColor } = useTheme();
   const { currentUser } = useAuth();
-  const [selectedColor, setSelectedColor] = useState(backgroundColor);
-  const [activeTab, setActiveTab] = useState('appearance');
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // User profile states
-  const [displayName, setDisplayName] = useState(currentUser?.displayName || '');
-  const [bio, setBio] = useState('');
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  
+  // Use the Firebase settings hook
+  const { settings, loading, updateProfile, updateNotifications, updatePrivacy, updateAppearance } = useUserSettings();
+  
+  const [activeTab, setActiveTab] = useState('appearance');
   const [uploadError, setUploadError] = useState<string>('');
   const [uploadSuccess, setUploadSuccess] = useState<string>('');
+  const [saving, setSaving] = useState(false);
 
-  // NOTIFICATION STATES 
-  const [notifications, setNotifications] = useState({
-    taskReminders: false,
-    weeklySummary: false,
-    overdueTasks: false,
-    desktopNotifications: false,
-    taskCompletionAlerts: false,
-  });
+  // Local form states
+  const [selectedColor, setSelectedColor] = useState(backgroundColor);
+  const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState(settings.notifications);
+  const [privacy, setPrivacy] = useState(settings.privacy);
 
-  const [privacy, setPrivacy] = useState({
-    privateMode: false,
-    allowAnalytics: true,
-  });
+  // Update form states when Firebase settings load
+  useEffect(() => {
+    if (!loading) {
+      setDisplayName(settings.profile.displayName);
+      setBio(settings.profile.bio);
+      setProfileImage(settings.profile.profileImageUrl || null);
+      setNotifications(settings.notifications);
+      setPrivacy(settings.privacy);
+      setSelectedColor(settings.appearance.backgroundColor);
+    }
+  }, [settings, loading]);
 
-  // Color options - Light colors
+  // Color options
   const colorOptions = [
     { name: 'White', value: '#ffffff' },
     { name: 'Light Gray', value: '#f8f9fa' },
@@ -45,87 +51,40 @@ const Settings = () => {
     { name: 'Light Orange', value: '#fff3e0' },
     { name: 'Cream', value: '#fefefe' },
     { name: 'Light Teal', value: '#e0f2f1' },
-    { name: 'Pale Rose', value: '#ffb6c1' },
-    { name: 'Light Lavender', value: '#e6e6fa' },
-    { name: 'Soft Mint', value: '#f0fff0' },
-    { name: 'Light Peach', value: '#ffefd5' },
-    { name: 'Powder Blue', value: '#b0e0e6' },
   ];
 
-  // Load saved settings on component mount
-  useEffect(() => {
-    // Load profile image
-    const savedImage = localStorage.getItem('profileImage');
-    if (savedImage) {
-      setProfileImage(savedImage);
-    }
-
-    // Load saved notifications
-    const savedNotifications = localStorage.getItem('notificationSettings');
-    if (savedNotifications) {
-      setNotifications(JSON.parse(savedNotifications));
-    }
-
-    // Load saved privacy settings
-    const savedPrivacy = localStorage.getItem('privacySettings');
-    if (savedPrivacy) {
-      setPrivacy(JSON.parse(savedPrivacy));
-    }
-  }, []);
   // Handle image upload
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target?.files?.[0];
     
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setUploadError('Please select a valid image file');
-      setUploadSuccess('');
       return;
     }
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setUploadError('Image size must be less than 5MB');
-      setUploadSuccess('');
       return;
     }
-    // Create FileReader to convert image to base64
+    
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64String = e.target?.result as string;
       setProfileImage(base64String);
-      localStorage.setItem('profileImage', base64String);
       setUploadError('');
-      setUploadSuccess('Profile picture updated successfully!');
-    
-      // Clear success message after 3 seconds
-      setTimeout(() => setUploadSuccess(''), 3000);
+      setUploadSuccess('Profile picture updated! Remember to save.');
     };
-
-    reader.onerror = () => {
-      setUploadError('Error reading the image file');
-      setUploadSuccess('');
-    };
-
     reader.readAsDataURL(file);
   };
 
-  // Trigger file input when button is clicked
   const handleChangeProfilePicture = () => {
     fileInputRef.current?.click();
   };
 
-  // Remove profile picture
   const handleRemoveProfilePicture = () => {
     setProfileImage(null);
-    localStorage.removeItem('profileImage');
-    setUploadSuccess('Profile picture removed successfully!');
-    setUploadError('');
-    // Clear success message after 3 seconds
-    setTimeout(() => setUploadSuccess(''), 3000);
-    
-    // Reset file input
+    setUploadSuccess('Profile picture removed! Remember to save.');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -133,102 +92,109 @@ const Settings = () => {
 
   // NOTIFICATION HANDLERS
   const handleNotificationChange = (key: keyof typeof notifications) => {
-    const newNotifications = {
-      ...notifications,
-      [key]: !notifications[key]
-    };
-    setNotifications(newNotifications);
-    console.log(`${key} changed to:`, !notifications[key]);
+    setNotifications(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
-  const handleSaveNotifications = () => {
-    localStorage.setItem('notificationSettings', JSON.stringify(notifications));
-    setUploadSuccess('Notification settings saved successfully!');
-    setUploadError('');
-    console.log('Notifications saved:', notifications);
+
+  const handleSaveNotifications = async () => {
+    setSaving(true);
+    const success = await updateNotifications(notifications);
+    setSaving(false);
     
-    // Clear success message after 3 seconds
-    setTimeout(() => setUploadSuccess(''), 3000);
+    if (success) {
+      setUploadSuccess('Notification settings saved successfully!');
+    } else {
+      setUploadError('Failed to save notification settings');
+    }
+    
+    setTimeout(() => {
+      setUploadSuccess('');
+      setUploadError('');
+    }, 3000);
   };
 
   // PRIVACY HANDLERS 
   const handlePrivacyChange = (key: keyof typeof privacy) => {
-    const newPrivacy = {
-      ...privacy,
-      [key]: !privacy[key]
-    };
-    setPrivacy(newPrivacy);
-    console.log(`${key} changed to:`, !privacy[key]);
+    setPrivacy(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
   };
 
-  const handleSavePrivacy = () => {
-    localStorage.setItem('privacySettings', JSON.stringify(privacy));
-    setUploadSuccess('Privacy settings saved successfully!');
-    setUploadError('');
-    console.log('Privacy settings saved:', privacy);
+  const handleSavePrivacy = async () => {
+    setSaving(true);
+    const success = await updatePrivacy(privacy);
+    setSaving(false);
     
-    // Clear success message after 3 seconds
-    setTimeout(() => setUploadSuccess(''), 3000);
+    if (success) {
+      setUploadSuccess('Privacy settings saved successfully!');
+    } else {
+      setUploadError('Failed to save privacy settings');
+    }
+    
+    setTimeout(() => {
+      setUploadSuccess('');
+      setUploadError('');
+    }, 3000);
   };
 
   // THEME HANDLERS
-  const handleSave = () => {
-    console.log('Save clicked! Selected color:', selectedColor);
-    console.log('Current background color:', backgroundColor);
+  const handleSave = async () => {
+    setSaving(true);
     setBackgroundColor(selectedColor);
-    console.log('Background color updated');
-    setUploadSuccess('Theme saved successfully!');
-    setTimeout(() => setUploadSuccess(''), 3000);
-    navigate(-1);
-  };
-
-  const handleCancel = () => {
-    setSelectedColor(backgroundColor);
-    navigate(-1);
-  };
-
-  const handleSaveProfile = () => {
-    console.log('Saving profile:', { displayName, bio, profileImage: profileImage ? 'Image saved' : 'No image' });
-    setUploadSuccess('Profile saved successfully!');
-    setUploadError('');
     
-    // Clear success message after 3 seconds
-    setTimeout(() => setUploadSuccess(''), 3000);
-  };
-
-  // Export data handler
-  const handleExportData = () => {
-    const data = {
-      profile: { displayName, bio, email: currentUser?.email },
-      notifications,
-      privacy,
-      theme: backgroundColor
-    };
+    const success = await updateAppearance({ backgroundColor: selectedColor });
+    setSaving(false);
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'my-planner-data.json';
-    a.click();
-    
-    setUploadSuccess('Data exported successfully!');
-    setTimeout(() => setUploadSuccess(''), 3000);
-  };
-
-  // Delete account handler
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      console.log('Account deletion requested');
-      alert('Account deletion feature not implemented yet. Contact support.');
+    if (success) {
+      setUploadSuccess('Theme saved successfully!');
+    } else {
+      setUploadError('Failed to save theme');
     }
+    
+    setTimeout(() => {
+      setUploadSuccess('');
+      setUploadError('');
+    }, 3000);
   };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    const success = await updateProfile({
+      displayName,
+      bio,
+      profileImageUrl: profileImage || undefined,
+    });
+    setSaving(false);
+    
+    if (success) {
+      setUploadSuccess('Profile saved successfully!');
+    } else {
+      setUploadError('Failed to save profile');
+    }
+    
+    setTimeout(() => {
+      setUploadSuccess('');
+      setUploadError('');
+    }, 3000);
+  };
+
+  if (loading) {
+    return (
+      <Container className="pt-4 text-center">
+        <Spinner animation="border" />
+        <p>Loading settings...</p>
+      </Container>
+    );
+  }
 
   return (
     <div style={{ backgroundColor: 'var(--bg-color)', minHeight: '100vh' }}>
       <Container className="pt-4">
         <Row className="justify-content-center">
           <Col md={10} lg={8}>
-            {/* Back Button */}
             <div className="d-flex align-items-center mb-4">
               <Button variant="outline-secondary" onClick={() => navigate(-1)} className="me-3">
                 ← Back
@@ -236,7 +202,6 @@ const Settings = () => {
               <h2 className="mb-0">Settings</h2>
             </div>
 
-            {/* Alert Messages */}
             {uploadError && (
               <Alert variant="danger" className="mb-3">
                 {uploadError}
@@ -273,9 +238,7 @@ const Settings = () => {
                     <h4 className="mb-4">Theme Settings</h4>
                     <Form>
                       <Form.Group className="mb-4">
-                        <Form.Label>
-                          <strong>Background Color</strong>
-                        </Form.Label>
+                        <Form.Label><strong>Background Color</strong></Form.Label>
                         <Form.Select
                           value={selectedColor}
                           onChange={(e) => setSelectedColor(e.target.value)}
@@ -287,16 +250,10 @@ const Settings = () => {
                             </option>
                           ))}
                         </Form.Select>
-                        <Form.Text className="text-muted">
-                          Choose a background color for your planner
-                        </Form.Text>
                       </Form.Group>
 
-                      {/* Color Preview */}
                       <Form.Group className="mb-4">
-                        <Form.Label>
-                          <strong>Preview</strong>
-                        </Form.Label>
+                        <Form.Label><strong>Preview</strong></Form.Label>
                         <div
                           style={{
                             backgroundColor: selectedColor,
@@ -316,11 +273,11 @@ const Settings = () => {
                       </Form.Group>
 
                       <div className="d-flex gap-2 justify-content-end">
-                        <Button variant="secondary" onClick={handleCancel}>
+                        <Button variant="secondary" onClick={() => navigate(-1)}>
                           Cancel
                         </Button>
-                        <Button variant="primary" onClick={handleSave}>
-                          Save & Close
+                        <Button variant="primary" onClick={handleSave} disabled={saving}>
+                          {saving ? <Spinner animation="border" size="sm" /> : 'Save'}
                         </Button>
                       </div>
                     </Form>
@@ -332,7 +289,6 @@ const Settings = () => {
                   <div>
                     <h4 className="mb-4">Profile Information</h4>
                     
-                    {/* Profile Picture Section */}
                     <div className="text-center mb-4">
                       <div 
                         style={{
@@ -353,10 +309,9 @@ const Settings = () => {
                           border: '3px solid #dee2e6'
                         }}
                       >
-                        {!profileImage && (currentUser?.displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U')}
+                        {!profileImage && (displayName?.charAt(0) || currentUser?.email?.charAt(0) || 'U')}
                       </div>
                       
-                      {/* Hidden file input */}
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -366,27 +321,15 @@ const Settings = () => {
                       />
                       
                       <div className="mt-3">
-                        <Button 
-                          variant="outline-primary" 
-                          onClick={handleChangeProfilePicture}
-                          className="me-2"
-                          size="sm"
-                        >
+                        <Button variant="outline-primary" onClick={handleChangeProfilePicture} className="me-2" size="sm">
                           Change Picture
                         </Button>
                         {profileImage && (
-                          <Button 
-                            variant="outline-danger" 
-                            onClick={handleRemoveProfilePicture}
-                            size="sm"
-                          >
+                          <Button variant="outline-danger" onClick={handleRemoveProfilePicture} size="sm">
                             Remove
                           </Button>
                         )}
                       </div>
-                      <Form.Text className="text-muted d-block mt-2">
-                        Supported formats: JPG, PNG, GIF (Max 5MB)
-                      </Form.Text>
                     </div>
 
                     <Form>
@@ -410,9 +353,6 @@ const Settings = () => {
                               value={currentUser?.email || ''}
                               disabled
                             />
-                            <Form.Text className="text-muted">
-                              Email cannot be changed
-                            </Form.Text>
                           </Form.Group>
                         </Col>
                       </Row>
@@ -428,13 +368,14 @@ const Settings = () => {
                         />
                       </Form.Group>
 
-                      <Button variant="primary" onClick={handleSaveProfile}>
-                        Save Profile
+                      <Button variant="primary" onClick={handleSaveProfile} disabled={saving}>
+                        {saving ? <Spinner animation="border" size="sm" /> : 'Save Profile'}
                       </Button>
                     </Form>
                   </div>
                 )}
 
+                {/* Notifications Tab */}
                 {activeTab === 'notifications' && (
                   <div>
                     <h4 className="mb-4">Notification Preferences</h4>
@@ -463,8 +404,8 @@ const Settings = () => {
                           onChange={() => handleNotificationChange('overdueTasks')}
                           className="mb-2"
                         />
-
                       </div>
+                      
                       <div className="mb-4">
                         <h5>Browser Notifications</h5>
                         <Form.Check
@@ -483,14 +424,14 @@ const Settings = () => {
                         />
                       </div>
 
-                      <Button variant="primary" onClick={handleSaveNotifications}>
-                        Save Notification Settings
+                      <Button variant="primary" onClick={handleSaveNotifications} disabled={saving}>
+                        {saving ? <Spinner animation="border" size="sm" /> : 'Save Notification Settings'}
                       </Button>
                     </Form>
                   </div>
                 )}
 
-              
+                {/* Privacy Tab */}
                 {activeTab === 'privacy' && (
                   <div>
                     <h4 className="mb-4">Privacy & Account</h4>
@@ -514,25 +455,8 @@ const Settings = () => {
                         />
                       </div>
 
-                      <div className="mb-4">
-                        <h5>Account Management</h5>
-                        <Button 
-                          variant="outline-warning" 
-                          className="me-2 mb-2"
-                          onClick={handleExportData}
-                        >
-                          Export My Data
-                        </Button>
-                        <Button 
-                          variant="outline-danger" 
-                          className="mb-2"
-                          onClick={handleDeleteAccount}
-                        >
-                          Delete Account
-                        </Button>
-                      </div>
-                      <Button variant="primary" onClick={handleSavePrivacy}>
-                        Save Privacy Settings
+                      <Button variant="primary" onClick={handleSavePrivacy} disabled={saving}>
+                        {saving ? <Spinner animation="border" size="sm" /> : 'Save Privacy Settings'}
                       </Button>
                     </Form>
                   </div>
