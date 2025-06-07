@@ -17,6 +17,7 @@ export interface Task {
   completedDate?: string;
   parentID?: string;        //id for the parent task
   children?: Task[];        //array to hold any child tasks
+   reminderOffsetMinutes?: number; // Optional; number of minutes before due/doDate to trigger reminder
 }
 
 export interface Category {
