@@ -4,6 +4,7 @@ import { useTheme } from '../ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { useUserSettings } from '../utils/userSettings';
+import { getContrastingTextColor } from '../utils/themeUtils';
 
 const Settings = () => {
   const { backgroundColor, setBackgroundColor } = useTheme();
@@ -144,16 +145,20 @@ const Settings = () => {
   const handleSave = async () => {
     setSaving(true);
     setBackgroundColor(selectedColor);
-    
+
+    const taskTitleColor = getContrastingTextColor(selectedColor);
+    document.documentElement.style.setProperty('--bg-color', selectedColor);
+    document.documentElement.style.setProperty('--task-title-color', taskTitleColor);
+
     const success = await updateAppearance({ backgroundColor: selectedColor });
     setSaving(false);
-    
+
     if (success) {
       setUploadSuccess('Theme saved successfully!');
     } else {
       setUploadError('Failed to save theme');
     }
-    
+
     setTimeout(() => {
       setUploadSuccess('');
       setUploadError('');
