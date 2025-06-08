@@ -28,6 +28,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [completable, setCompletable] = useState(false);
   const [reminderOffsetMinutes, setReminderOffsetMinutes] = useState<number>(5); // Default to 5
 
   // Populate form state when task changes OR reset when creating
@@ -140,6 +141,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         completed,
         colour,
         ...(parentID && {parentID}),
+        completable,
         reminderOffsetMinutes,
       };
 
@@ -170,6 +172,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
         ...(parentID && { parentID }),
+        completable,
         reminderOffsetMinutes,
       });
     }

@@ -17,7 +17,8 @@ export interface Task {
   completedDate?: string;
   parentID?: string;        //id for the parent task
   children?: Task[];        //array to hold any child tasks
-   reminderOffsetMinutes?: number; // Optional; number of minutes before due/doDate to trigger reminder
+  completable?: boolean;    //determines whether or not the task can be completed based on the parent task status. 
+  reminderOffsetMinutes?: number; // Optional; number of minutes before due/doDate to trigger reminder
 }
 
 export interface Category {
