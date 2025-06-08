@@ -109,3 +109,20 @@ html {
     color: white !important;
     border-color: #555 !important;
   }
+
+  .task-title {
+  color: var(--task-title-color, #212529); /* fallback to dark text */
+}
+
+.task-title-gradient {
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, rgb(3, 113, 113), rgb(9, 166, 206));
+  background-clip: text;              /* Standard property */
+  -webkit-background-clip: text;      /* For WebKit browsers */
+  -webkit-text-fill-color: transparent;
+}
+
+.dark-theme .task-title-gradient {
+  background: linear-gradient(90deg, #6ff, #39f); /* darker hues for dark background */
+}
