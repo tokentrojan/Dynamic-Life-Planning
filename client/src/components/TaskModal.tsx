@@ -28,6 +28,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [reminderOffsetMinutes, setReminderOffsetMinutes] = useState<number>(5); // Default to 5
 
   // Populate form state when task changes OR reset when creating
   useEffect(() => {
@@ -42,7 +43,9 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
       setRecurringDay(task.recurringDay ?? "");
       setCompleted(task.completed ?? false);
       setColour(task.colour ?? "");
+      setReminderOffsetMinutes(task.reminderOffsetMinutes ?? 5);
       setIsEditing(false); // Start in view mode
+      
 
     } else {
       setTaskName("");
@@ -55,6 +58,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
       setRecurringDay("");
       setCompleted(false);
       setColour("");
+      setReminderOffsetMinutes(5);
       setIsEditing(true); // Start in form mode for new task
     }
   }, [task, show]);
@@ -136,6 +140,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         completed,
         colour,
         ...(parentID && {parentID}),
+        reminderOffsetMinutes,
       };
 
       // Only add completedDate if being marked complete now
@@ -165,6 +170,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
         ...(parentID && { parentID }),
+        reminderOffsetMinutes,
       });
     }
 
@@ -293,6 +299,17 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
                   );
                 })}
               </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Reminder (minutes before)</Form.Label>
+              <Form.Control
+                type="number"
+                min={1}
+                max={1440}
+                value={reminderOffsetMinutes}
+                onChange={(e) => setReminderOffsetMinutes(Number(e.target.value))}
+              />
             </Form.Group>
 
             <Form.Check

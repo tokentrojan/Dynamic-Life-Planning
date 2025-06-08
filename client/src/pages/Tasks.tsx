@@ -195,8 +195,8 @@ const Tasks = () => {
         {isExpanded &&
           subtasks.map((subtask) => renderTaskWithSubtasks(subtask, level + 1))}
       </div>
-    );
-  };
+  );
+};
 
   return (
     <Container className="mt-4">
