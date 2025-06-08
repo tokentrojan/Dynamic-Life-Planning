@@ -1,4 +1,4 @@
-import { Container, Form, Row, Col, Modal, Button } from "react-bootstrap";
+import { Container, Form, Modal, Button } from "react-bootstrap";
 import { useState } from "react";
 import { useTasks } from "../data/firebasetasks";
 import TaskCard from "../components/TaskCard";
@@ -6,6 +6,7 @@ import TaskModal from "../components/TaskModal";
 import { Task } from "../types/Task";
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
+import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
 const Tasks = () => {
   const tasks = useTasks();
@@ -181,7 +182,6 @@ const Tasks = () => {
           >
             <TaskCard
               task={task}
-              onEdit={() => setSelectedTask(task)}
               onCategoryClick={handleCategoryClick}
               onPriorityClick={handlePriorityClick}
               onRecurringClick={handleRecurringClick}
@@ -203,69 +203,64 @@ const Tasks = () => {
       <h2 className="mb-3">Tasks</h2>
 
       {/* Filter checkboxes */}
-      <Form className="mb-3">
-        <Row>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Sorted"
-              checked={filters.sorted}
-              onChange={() => handleFilterToggle("sorted")}
-            />
-          </Col>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Unsorted"
-              checked={filters.unsorted}
-              onChange={() => handleFilterToggle("unsorted")}
-            />
-          </Col>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Completed"
-              checked={filters.completed}
-              onChange={() => handleFilterToggle("completed")}
-            />
-          </Col>
-          <Button
-            variant="outline-danger"
-            onClick={clearAllFilters}
-            className="mt-2"
-          >
-            Clear All Filters
-          </Button>
-        </Row>
-      </Form>
+      <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <ButtonGroup>
+          {["Sorted", "Unsorted", "Completed"].map((label, idx) => {
+            const key = label.toLowerCase() as keyof typeof filters;
+            return (
+              <ToggleButton
+                key={idx}
+                id={`filter-${key}`}
+                type="checkbox"
+                variant={filters[key] ? "primary" : "outline-primary"}
+                checked={filters[key]}
+                value={label}
+                onChange={() => handleFilterToggle(key)}
+              >
+                {label}
+              </ToggleButton>
+            );
+          })}
+        </ButtonGroup>
+
+        <Button
+          variant="outline-danger"
+          onClick={clearAllFilters}
+          size="sm"
+          className="ms-auto"
+        >
+          Clear Filters
+        </Button>
+      </div>
 
       {/* Sort field and order controls */}
-      <Form.Group className="mb-4">
-        <Form.Label>Sort Options</Form.Label>
-        <div className="d-flex flex-wrap align-items-end gap-2">
-          <Form.Select
-            value={sortField}
-            onChange={(e) => setSortField(e.target.value as any)}
-            style={{ minWidth: "200px" }}
-          >
-            <option value="priority">Priority</option>
-            <option value="dueDate">Due Date</option>
-            <option value="doDate">Do Date</option>
-            <option value="duration">Duration</option>
-            <option value="colour">Colour</option>
-            {filters.completed && (
-              <option value="completedDate">Completed Date</option>
-            )}
-          </Form.Select>
+      <div className="d-flex flex-wrap align-items-center gap-6 mb-5">
+        <Form.Label className="mb-0 me-2 fw-semibold">Sort By:</Form.Label>
 
-          <Button
-            variant="outline-secondary"
-            onClick={() => setSortOrderAsc(!sortOrderAsc)}
-          >
-            {sortOrderAsc ? "⬆ Asc" : "⬇ Desc"}
-          </Button>
-        </div>
-      </Form.Group>
+        <Form.Select
+          value={sortField}
+          onChange={(e) => setSortField(e.target.value as any)}
+          size="sm"
+          style={{ width: "200px" }}
+        >
+          <option value="priority">🚩 Priority</option>
+          <option value="dueDate">📅 Due Date</option>
+          <option value="doDate">⏰ Do Date</option>
+          <option value="duration">⏳ Duration</option>
+          <option value="colour">🎨 Colour</option>
+          {filters.completed && (
+            <option value="completedDate">Completed Date</option>
+          )}
+        </Form.Select>
+
+        <Button
+          variant="outline-secondary"
+          onClick={() => setSortOrderAsc(!sortOrderAsc)}
+          size="sm"
+        >
+          {sortOrderAsc ? "⬆ Asc" : "⬇ Desc"}
+        </Button>
+      </div>
 
       {/* Render tasks */}
       {getSortedTasks().filter((task) => !task.parentID).length === 0 ? ( // only top-level tasks
@@ -313,7 +308,6 @@ const Tasks = () => {
               <TaskCard
                 key={task.taskID}
                 task={task}
-                onEdit={() => setSelectedTask(task)}
                 onCategoryClick={handleCategoryClick}
                 onPriorityClick={handlePriorityClick}
                 onRecurringClick={handleRecurringClick}

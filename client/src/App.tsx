@@ -20,6 +20,7 @@ import { ThemeProvider, useTheme } from "./ThemeContext";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase"; // Make sure db is exported from firebase.ts
 import { Task } from "./types/Task";  // Path to your Task type
+import './theme.css';
 // Wrapper component to apply theme to the entire app
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
