@@ -9,6 +9,7 @@ import { useTasks } from '../data/firebasetasks';
 import { Task } from '../types/Task';
 import CreateTaskButton from '../components/CreateTaskButton';
 import * as CreateTaskButtonModule from '../components/CreateTaskButton';
+import CustomCalendarEvent from "../components/CalendarEvent";
 console.log('CreateTaskButtonModule:', CreateTaskButtonModule);
 
 // Setup for date-fns
