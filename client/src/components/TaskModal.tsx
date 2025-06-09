@@ -5,6 +5,8 @@ import { db, auth } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { v4 as uuid } from "uuid";
 import { updateCompletableStatus as updateCompletableField } from "../utils/UpdateCompletable";
+import { useTheme } from '../ThemeContext';
+import { darkenColor } from '../utils/themeUtils';
 
 interface TaskModalProps {
   task?: Task;
@@ -13,9 +15,12 @@ interface TaskModalProps {
   parentID?: string | null;
 }
 
+
 function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const isExistingTask = !!task; // true if editing/viewing, false if creating
   const [isEditing, setIsEditing] = useState(!task); // if no task, we're creating
+  const { backgroundColor } = useTheme();
+  const darkenedTitleColor = darkenColor(backgroundColor, 41); // 41% darker
 
   // Form state
   const [taskName, setTaskName] = useState("");
@@ -250,26 +255,42 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         {!isEditing ? (
           // View Mode Card
           <Card className="p-3 shadow-sm">
-            <h4>{taskName}</h4>
-            <p className="text-muted">Due: {formatDate(dueDate)}</p>
-            {doDate && <p className="text-muted">Do: {formatDate(doDate)}</p>}
-            <p>{taskDescription}</p>
-            {priority && (
-              <Badge bg={getPriorityBadgeColor(priority)} className="me-2">
-                {priority.toUpperCase()}
-              </Badge>
-            )}
-            {colour && (
-              <Badge bg={getColourBadgeColor(colour)} className="me-2">
-                {categories[colour]?.toUpperCase() ?? colour.toUpperCase()}
-              </Badge>
-            )}
-            {recurring && recurringDay && (
-              <Badge bg="info" className="me-2">
-                Repeats: {recurringDay}
-              </Badge>
-            )}
-            {completed && <Badge bg="secondary">Completed</Badge>}
+            <div className="d-flex justify-content-between align-items-start mb-2">
+              <h3
+                className="mb-3"
+                style={{
+                  fontSize: "1.75rem",
+                  fontWeight: 800,
+                  color: darkenedTitleColor,
+                  textTransform: "uppercase",
+                }}
+              >
+                {taskName}
+              </h3>
+              <div>
+                {priority && (
+                  <Badge bg={getPriorityBadgeColor(priority)} className="me-2">
+                    {priority.toUpperCase()}
+                  </Badge>
+                )}
+                {colour && (
+                  <Badge bg={getColourBadgeColor(colour)} className="me-2">
+                    {categories[colour]?.toUpperCase() ?? colour.toUpperCase()}
+                  </Badge>
+                )}
+                {recurring && recurringDay && (
+                  <Badge bg="info" className="me-2">
+                    Repeats: {recurringDay}
+                  </Badge>
+                )}
+                {completed && <Badge bg="secondary">Completed</Badge>}
+              </div>
+            </div>
+
+            <p className="text-muted mb-1">Due: {formatDate(dueDate)}</p>
+            {doDate && <p className="text-muted mb-3">Do: {formatDate(doDate)}</p>}
+
+            <p style={{ whiteSpace: "pre-wrap" }}>{taskDescription}</p>
           </Card>
         ) : (
           <Form>
