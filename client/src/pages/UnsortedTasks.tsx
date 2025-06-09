@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { Container } from 'react-bootstrap';
 import { useTasks } from '../data/firebasetasks';
 import TaskCard from '../components/TaskCard';
@@ -36,8 +37,24 @@ function UnsortedTasks() {
           onClose={() => setSelectedTask(null)} // Close modal
         />
       )}
+=======
+import { Container, ListGroup } from 'react-bootstrap';
+
+function UnsortedTasks() {
+  return (
+    <Container className="mt-4">
+      <h2>Unsorted Tasks</h2>
+      <ListGroup>
+        <ListGroup.Item>Unsorted Task 1</ListGroup.Item>
+        <ListGroup.Item>Unsorted Task 2</ListGroup.Item>
+      </ListGroup>
+>>>>>>> Stashed changes
     </Container>
   );
 }
 
+<<<<<<< Updated upstream
 export default UnsortedTasks;
+=======
+export default UnsortedTasks;
+>>>>>>> Stashed changes
