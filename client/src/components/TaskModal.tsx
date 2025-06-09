@@ -4,6 +4,7 @@ import { Task } from "../types/Task";
 import { db, auth } from "../firebase";
 import { doc, setDoc, updateDoc, getDoc } from "firebase/firestore";
 import { v4 as uuid } from "uuid";
+import { updateCompletableStatus as updateCompletableField } from "../utils/UpdateCompletable";
 
 interface TaskModalProps {
   task?: Task;
@@ -28,10 +29,32 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const [completed, setCompleted] = useState(false);
   const [colour, setColour] = useState(""); //  Category field
   const [categories, setCategories] = useState<{ [key: string]: string }>({});
+  const [reminderOffsetMinutes, setReminderOffsetMinutes] = useState<number>(5); // Default to 5
+  const [completable, setCompletable] = useState(true); //default to true
+
 
   // Populate form state when task changes OR reset when creating
-  useEffect(() => {
-    if (task) {
+ useEffect(() => {
+  const fetchCompletableStatus = async () => {
+    const userId = auth.currentUser?.uid || localStorage.getItem("cachedUID");
+    if (!userId) return;
+
+    if (show && task) {
+      // Viewing/editing an existing task
+      if (task.parentID) {
+        const parentRef = doc(db, 'users', userId, 'tasks', task.parentID);
+        try {
+          const parentSnap = await getDoc(parentRef);
+          const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
+          setCompletable(isParentCompleted);//true if parent is complete, otherwise false
+        } catch {
+          setCompletable(true); // on error make task completable 
+        }
+      } else {
+        setCompletable(true); // no parent, task is completable
+      }
+
+      // Load the task into form
       setTaskName(task.taskName);
       setTaskDescription(task.taskDescription);
       setDueDate(task.dueDate);
@@ -42,9 +65,10 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
       setRecurringDay(task.recurringDay ?? "");
       setCompleted(task.completed ?? false);
       setColour(task.colour ?? "");
-      setIsEditing(false); // Start in view mode
-
+      setReminderOffsetMinutes(task.reminderOffsetMinutes ?? 5);
+      setIsEditing(false);
     } else {
+      // Creating a new task
       setTaskName("");
       setTaskDescription("");
       setDueDate("");
@@ -55,9 +79,27 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
       setRecurringDay("");
       setCompleted(false);
       setColour("");
-      setIsEditing(true); // Start in form mode for new task
+      setReminderOffsetMinutes(5);
+      setIsEditing(true);
+
+      if (parentID) {
+        const parentRef = doc(db, 'users', userId, 'tasks', parentID);
+        try {
+          const parentSnap = await getDoc(parentRef);
+          const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
+          setCompletable(isParentCompleted);
+        } catch {
+          setCompletable(false); // default to false
+        }
+      } else {
+        setCompletable(true);
+      }
     }
-  }, [task, show]);
+  };
+
+  fetchCompletableStatus();
+}, [task, show, parentID]);
+
 
   // Maps your internal category keys (cat1…cat6) to Bootstrap badge variants.
   const categoryColorMap: { [key: string]: string } = {
@@ -135,7 +177,9 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         recurringDay,
         completed,
         colour,
-        ...(parentID && {parentID}),
+        ...(parentID && { parentID }),
+        completable,
+        reminderOffsetMinutes,
       };
 
       // Only add completedDate if being marked complete now
@@ -165,7 +209,13 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         ...(recurring && { recurring: true, recurringDay }),
         ...(colour && { colour }),
         ...(parentID && { parentID }),
+        completable,
+        reminderOffsetMinutes,
       });
+
+      if (parentID) {
+        await updateCompletableField(userID, taskID, parentID);
+      }
     }
 
     onClose(); // Close modal after save
@@ -295,10 +345,27 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
               </Form.Select>
             </Form.Group>
 
+            <Form.Group className="mb-3">
+              <Form.Label>Reminder (minutes before)</Form.Label>
+              <Form.Control
+                type="number"
+                min={1}
+                max={1440}
+                value={reminderOffsetMinutes}
+                onChange={(e) => setReminderOffsetMinutes(Number(e.target.value))}
+              />
+            </Form.Group>
+
             <Form.Check
               type="checkbox"
-              label="Completed"
+              label={
+                <>
+                  Completed{" "}
+                  {!completable && <small className="text-muted">(parent task incomplete)</small>}
+                </>
+              }
               checked={completed}
+              disabled={!completable}
               onChange={(e) => setCompleted(e.target.checked)}
               className="mb-3"
             />

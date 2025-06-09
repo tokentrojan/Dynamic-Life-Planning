@@ -1,4 +1,4 @@
-import { Container, Form, Row, Col, Modal, Button } from "react-bootstrap";
+import { Container, Form, Modal, Button } from "react-bootstrap";
 import { useState } from "react";
 import { useTasks } from "../data/firebasetasks";
 import TaskCard from "../components/TaskCard";
@@ -6,6 +6,7 @@ import TaskModal from "../components/TaskModal";
 import { Task } from "../types/Task";
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
+import { ButtonGroup, ToggleButton } from "react-bootstrap";
 
 const Tasks = () => {
   const tasks = useTasks();
@@ -42,7 +43,7 @@ const Tasks = () => {
     setLabelFilter({});
     setShowLabelFilterModal(false);
     // Optionally reset sort too:
-    setSortField('dueDate');
+    setSortField("dueDate");
     setSortOrderAsc(true);
   };
 
@@ -50,26 +51,30 @@ const Tasks = () => {
     return (
       (!labelFilter.colour || task.colour === labelFilter.colour) &&
       (!labelFilter.priority || task.priority === labelFilter.priority) &&
-      (!labelFilter.recurringDay || task.recurringDay === labelFilter.recurringDay)
+      (!labelFilter.recurringDay ||
+        task.recurringDay === labelFilter.recurringDay)
     );
   });
 
   // Sorting state
-  const [sortField, setSortField] = useState<'priority' | 'dueDate' | 'doDate' | 'duration' | 'colour'| 'completedDate'>('dueDate');
+  const [sortField, setSortField] = useState<
+    "priority" | "dueDate" | "doDate" | "duration" | "colour" | "completedDate"
+  >("dueDate");
   const [sortOrderAsc, setSortOrderAsc] = useState(true);
 
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [creatingSubtaskFor, setCreatingSubtaskFor] = useState<string | null>(null);
+  const [creatingSubtaskFor, setCreatingSubtaskFor] = useState<string | null>(
+    null
+  );
 
   const handleAddSubtask = (parentID: string) => {
     setCreatingSubtaskFor(parentID);
-    setSelectedTask(null);  // open modal in "create" mode
+    setSelectedTask(null); // open modal in "create" mode
   };
-
 
   const handleFilterToggle = (key: keyof typeof filters) => {
     setFilters((prev) => {
-      if (key === 'completed') {
+      if (key === "completed") {
         const newCompleted = !prev.completed;
         return {
           sorted: !newCompleted,
@@ -90,12 +95,20 @@ const Tasks = () => {
   const isUnsorted = (task: Task) => !task.priority && !task.completed;
   const isCompleted = (task: Task) => task.completed;
 
-  const filteredTasks = tasks.filter((task) => {
-    return (
+  const filteredTasks = tasks.filter((task) => { //changed to return the tasks including parent (and child) tasks of completed tasks. 
+    const matchesFilters =
       (filters.sorted && isSorted(task)) ||
       (filters.unsorted && isUnsorted(task)) ||
-      (filters.completed && isCompleted(task))
+      (filters.completed && isCompleted(task));
+
+    const isParentOfVisibleSubtask = tasks.some(
+      (t) => t.parentID === task.taskID && (
+        (filters.sorted && isSorted(t)) ||
+        (filters.unsorted && isUnsorted(t)) ||
+        (filters.completed && isCompleted(t))
+      )
     );
+    return matchesFilters || isParentOfVisibleSubtask;
   });
 
   // Apply sorting based on selected field and order
@@ -109,25 +122,31 @@ const Tasks = () => {
       if (bVal === undefined) return -1;
 
       // Handle special cases
-      if (sortField === 'priority') {
+      if (sortField === "priority") {
         const map: Record<string, number> = { high: 3, medium: 2, low: 1 };
         aVal = map[aVal] || 0;
         bVal = map[bVal] || 0;
       }
 
-      if (sortField === 'doDate') {
-        aVal = a.doDate ? new Date(a.doDate).getTime() : new Date(a.dueDate).getTime();
-        bVal = b.doDate ? new Date(b.doDate).getTime() : new Date(b.dueDate).getTime();
-      } else if (sortField === 'dueDate') {
+      if (sortField === "doDate") {
+        aVal = a.doDate
+          ? new Date(a.doDate).getTime()
+          : new Date(a.dueDate).getTime();
+        bVal = b.doDate
+          ? new Date(b.doDate).getTime()
+          : new Date(b.dueDate).getTime();
+      } else if (sortField === "dueDate") {
         aVal = new Date(a.dueDate).getTime();
         bVal = new Date(b.dueDate).getTime();
       }
 
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortOrderAsc ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      if (typeof aVal === "string" && typeof bVal === "string") {
+        return sortOrderAsc
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
       }
 
-      if (sortField === 'completedDate') {
+      if (sortField === "completedDate") {
         aVal = a.completedDate ? new Date(a.completedDate).getTime() : 0;
         bVal = b.completedDate ? new Date(b.completedDate).getTime() : 0;
       }
@@ -138,9 +157,11 @@ const Tasks = () => {
     return sorted;
   };
 
-  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>({});
+  const [expandedTasks, setExpandedTasks] = useState<Record<string, boolean>>(
+    {}
+  );
   const toggleExpanded = (taskID: string) => {
-    setExpandedTasks(prev => {
+    setExpandedTasks((prev) => {
       const newState = {
         ...prev,
         [taskID]: !prev[taskID],
@@ -149,17 +170,19 @@ const Tasks = () => {
     });
   };
 
-
   const renderTaskWithSubtasks = (task: Task, level = 0) => {
-    const subtasks = filteredTasks.filter(t => t.parentID === task.taskID);
+    const subtasks = filteredTasks.filter((t) => t.parentID === task.taskID);
     const isExpanded = expandedTasks[task.taskID] ?? false;
     const hasSubtasks = subtasks.length > 0; //true if there are subtasks
 
     return (
-      <div key={task.taskID} style={{
-        paddingLeft: level * 20,
-        marginBottom: level === 0 ? 20 : 0, // Space only between top-level tasks
-      }}>
+      <div
+        key={task.taskID}
+        style={{
+          paddingLeft: level * 20,
+          marginBottom: level === 0 ? 20 : 0, // Space only between top-level tasks
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center" }}>
           <div
             style={{ flex: 1, cursor: "pointer" }}
@@ -167,7 +190,6 @@ const Tasks = () => {
           >
             <TaskCard
               task={task}
-              onEdit={() => setSelectedTask(task)}
               onCategoryClick={handleCategoryClick}
               onPriorityClick={handlePriorityClick}
               onRecurringClick={handleRecurringClick}
@@ -178,85 +200,83 @@ const Tasks = () => {
             />
           </div>
         </div>
-        {isExpanded && subtasks.map(subtask => renderTaskWithSubtasks(subtask, level + 1))}
+        {isExpanded &&
+          subtasks.map((subtask) => renderTaskWithSubtasks(subtask, level + 1))}
       </div>
     );
   };
-
-
 
   return (
     <Container className="mt-4">
       <h2 className="mb-3">Tasks</h2>
 
       {/* Filter checkboxes */}
-      <Form className="mb-3">
-        <Row>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Sorted"
-              checked={filters.sorted}
-              onChange={() => handleFilterToggle("sorted")}
-            />
-          </Col>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Unsorted"
-              checked={filters.unsorted}
-              onChange={() => handleFilterToggle("unsorted")}
-            />
-          </Col>
-          <Col xs={12} md={4}>
-            <Form.Check
-              type="checkbox"
-              label="Completed"
-              checked={filters.completed}
-              onChange={() => handleFilterToggle("completed")}
-            />
-          </Col>
-          <Button variant="outline-danger" onClick={clearAllFilters} className="mt-2">
-            Clear All Filters
-          </Button>
-        </Row>
-      </Form>
+      <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
+        <ButtonGroup>
+          {["Sorted", "Unsorted", "Completed"].map((label, idx) => {
+            const key = label.toLowerCase() as keyof typeof filters;
+            return (
+              <ToggleButton
+                key={idx}
+                id={`filter-${key}`}
+                type="checkbox"
+                variant={filters[key] ? "primary" : "outline-primary"}
+                checked={filters[key]}
+                value={label}
+                onChange={() => handleFilterToggle(key)}
+              >
+                {label}
+              </ToggleButton>
+            );
+          })}
+        </ButtonGroup>
+
+        <Button
+          variant="outline-danger"
+          onClick={clearAllFilters}
+          size="sm"
+          className="ms-auto"
+        >
+          Clear Filters
+        </Button>
+      </div>
 
       {/* Sort field and order controls */}
-      <Form.Group className="mb-4">
-      <Form.Label>Sort Options</Form.Label>
-      <div className="d-flex flex-wrap align-items-end gap-2">
+      <div className="d-flex flex-wrap align-items-center gap-6 mb-5">
+        <Form.Label className="mb-0 me-2 fw-semibold">Sort By:</Form.Label>
+
         <Form.Select
           value={sortField}
           onChange={(e) => setSortField(e.target.value as any)}
-          style={{ minWidth: "200px" }}
+          size="sm"
+          style={{ width: "200px" }}
         >
-          <option value="priority">Priority</option>
-          <option value="dueDate">Due Date</option>
-          <option value="doDate">Do Date</option>
-          <option value="duration">Duration</option>
-          <option value="colour">Colour</option>
-          {filters.completed && <option value="completedDate">Completed Date</option>}
+          <option value="priority">🚩 Priority</option>
+          <option value="dueDate">📅 Due Date</option>
+          <option value="doDate">⏰ Do Date</option>
+          <option value="duration">⏳ Duration</option>
+          <option value="colour">🎨 Colour</option>
+          {filters.completed && (
+            <option value="completedDate">Completed Date</option>
+          )}
         </Form.Select>
 
         <Button
           variant="outline-secondary"
           onClick={() => setSortOrderAsc(!sortOrderAsc)}
+          size="sm"
         >
-          {sortOrderAsc ? '⬆ Asc' : '⬇ Desc'}
+          {sortOrderAsc ? "⬆ Asc" : "⬇ Desc"}
         </Button>
       </div>
-    </Form.Group>
 
       {/* Render tasks */}
-      {getSortedTasks()
-        .filter(task => !task.parentID) // only top-level tasks
-        .length === 0 ? (
-          <p>No tasks match the selected filters.</p>
+      {getSortedTasks().filter((task) => !task.parentID).length === 0 ? ( // only top-level tasks
+        <p>No tasks match the selected filters.</p>
       ) : (
         getSortedTasks()
-          .filter(task => !task.parentID)
-          .map(task => renderTaskWithSubtasks(task))
+          .filter((task) => !task.parentID)
+          .map((task) => renderTaskWithSubtasks(task))
       )}
       {selectedTask && (
         <TaskModal
@@ -268,7 +288,7 @@ const Tasks = () => {
       {/* Subtask creation modal */}
       {creatingSubtaskFor && (
         <TaskModal
-          parentID={creatingSubtaskFor}   // Pass the parent task ID
+          parentID={creatingSubtaskFor} // Pass the parent task ID
           show={true}
           onClose={() => setCreatingSubtaskFor(null)}
         />
@@ -282,7 +302,12 @@ const Tasks = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             Showing tasks by filter:
-            {" " + (labelFilter.colour || labelFilter.priority || labelFilter.recurringDay)?.toUpperCase()}
+            {" " +
+              (
+                labelFilter.colour ||
+                labelFilter.priority ||
+                labelFilter.recurringDay
+              )?.toUpperCase()}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -291,7 +316,6 @@ const Tasks = () => {
               <TaskCard
                 key={task.taskID}
                 task={task}
-                onEdit={() => setSelectedTask(task)}
                 onCategoryClick={handleCategoryClick}
                 onPriorityClick={handlePriorityClick}
                 onRecurringClick={handleRecurringClick}
@@ -305,8 +329,8 @@ const Tasks = () => {
 
       <CreateTaskButton />
       <CategoryManagerButton />
-      </Container>
-        );
-      };
+    </Container>
+  );
+};
 
 export default Tasks;
