@@ -57,7 +57,7 @@ function TaskCard({
   }, [task.colour]);
 
   const { backgroundColor } = useTheme();
-  const darkenedTitleColor = darkenColor(backgroundColor, 41); // 35% darker
+  const darkenedTitleColor = darkenColor(backgroundColor, 41); // 41% darker
 
   // Map priority to Bootstrap color
   const getBadgeColor = (priority?: string) => {
