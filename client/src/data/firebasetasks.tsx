@@ -40,8 +40,7 @@ export function useTasks(): Task[] {
           updateDoc(ref, { completed: false, dueDate: formattedDate });
           data.completed = false;
           data.dueDate = formattedDate;
-        }
-        
+                }
 
         // Push all tasks in the list, filter them in UI
         taskList.push({ taskID, ...data });

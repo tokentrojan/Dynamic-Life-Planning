@@ -95,12 +95,20 @@ const Tasks = () => {
   const isUnsorted = (task: Task) => !task.priority && !task.completed;
   const isCompleted = (task: Task) => task.completed;
 
-  const filteredTasks = tasks.filter((task) => {
-    return (
+  const filteredTasks = tasks.filter((task) => { //changed to return the tasks including parent (and child) tasks of completed tasks. 
+    const matchesFilters =
       (filters.sorted && isSorted(task)) ||
       (filters.unsorted && isUnsorted(task)) ||
-      (filters.completed && isCompleted(task))
+      (filters.completed && isCompleted(task));
+
+    const isParentOfVisibleSubtask = tasks.some(
+      (t) => t.parentID === task.taskID && (
+        (filters.sorted && isSorted(t)) ||
+        (filters.unsorted && isUnsorted(t)) ||
+        (filters.completed && isCompleted(t))
+      )
     );
+    return matchesFilters || isParentOfVisibleSubtask;
   });
 
   // Apply sorting based on selected field and order
@@ -195,8 +203,8 @@ const Tasks = () => {
         {isExpanded &&
           subtasks.map((subtask) => renderTaskWithSubtasks(subtask, level + 1))}
       </div>
-  );
-};
+    );
+  };
 
   return (
     <Container className="mt-4">
