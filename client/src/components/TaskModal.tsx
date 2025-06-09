@@ -46,12 +46,12 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         try {
           const parentSnap = await getDoc(parentRef);
           const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
-          setCompletable(isParentCompleted);
+          setCompletable(isParentCompleted);//true if parent is complete, otherwise false
         } catch {
-          setCompletable(false); // fail safe
+          setCompletable(true); // on error make task completable 
         }
       } else {
-        setCompletable(true); // no parent = completable
+        setCompletable(true); // no parent, task is completable
       }
 
       // Load the task into form
