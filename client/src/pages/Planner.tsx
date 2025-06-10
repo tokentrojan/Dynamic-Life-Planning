@@ -21,6 +21,12 @@ const localizer = dateFnsLocalizer({
   locales: { 'en-AU': enAU },
 });
 
+const formats = {
+    eventTimeRangeFormat: () => { 
+      return "";
+    },
+  };
+
 // Calendar display format, this is the simplified version for calendar view.
 type TaskEvent = {
   id: string;
@@ -73,8 +79,15 @@ const Planner = () => {
 
   return (
     <Container className="mt-4">
-      <h2 className="mb-3">Planner View</h2>
+      <h2
+        style={{
+          textAlign: "center",
+        }}
+      >
+        Planner
+      </h2>
       <Calendar
+        formats={formats}
         localizer={localizer}
         events={events} 
         date = {date}         //controls current visible date

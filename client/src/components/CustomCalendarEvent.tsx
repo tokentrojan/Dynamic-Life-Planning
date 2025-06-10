@@ -12,16 +12,6 @@ const categoryColorMap: Record<string, string> = {
   cat6: "#000000", // Black
 };
 
-// Determine if light or dark text should be used
-const getContrastingTextColor = (bgColor: string) => {
-  const hex = bgColor.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  return brightness > 150 ? "#212529" : "#ffffff";
-};
-
 const getPriorityColor = (priority?: string): string => {
   switch (priority) {
     case "high":
@@ -40,14 +30,15 @@ type Props = {
 };
 
 const CustomCalendarEvent: React.FC<Props> = ({ event }) => {
-  const categoryBg = categoryColorMap[event.colour ?? ""] || "#dee2e6";
-  const textColor = getContrastingTextColor(categoryBg);
+  const categoryBg = categoryColorMap[event.colour ?? ""] || "#6c757d";
+  
 
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
+        borderLeft: `6px solid ${categoryBg}`,
         padding: "4px 6px",
         fontSize: "0.85rem",
         fontWeight: 600,
@@ -55,9 +46,9 @@ const CustomCalendarEvent: React.FC<Props> = ({ event }) => {
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
-        backgroundColor: categoryBg,
+        backgroundColor: "#ffff",
         borderRadius: "4px",
-        color: textColor,
+        color: categoryBg,
       }}
     >
       {event.priority && (

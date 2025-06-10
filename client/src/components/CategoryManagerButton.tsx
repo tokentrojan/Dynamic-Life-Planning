@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, OverlayTrigger, Tooltip, Modal } from "react-bootstrap";
 import CategoryManager from "./CategoryManager";
 
@@ -16,7 +16,7 @@ export default function CategoryManagerButton() {
           onClick={() => setShow(true)}
           style={{
             position: "fixed",
-            bottom: "100px", // sit above your “+” task button
+            bottom: "100px", // sit above “+” task button
             right: "20px",
             zIndex: 1050,
             borderRadius: "50%",
