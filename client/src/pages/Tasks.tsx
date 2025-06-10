@@ -7,6 +7,10 @@ import { Task } from "../types/Task";
 import CreateTaskButton from "../components/CreateTaskButton";
 import CategoryManagerButton from "../components/CategoryManagerButton";
 import { ButtonGroup, ToggleButton } from "react-bootstrap";
+import 'react-date-range/dist/styles.css'; // main style
+import 'react-date-range/dist/theme/default.css'; // theme
+import { DateRange, Range } from 'react-date-range';
+
 
 const Tasks = () => {
   const tasks = useTasks();
@@ -24,6 +28,15 @@ const Tasks = () => {
     recurringDay?: string;
   }>({});
   const [showLabelFilterModal, setShowLabelFilterModal] = useState(false);
+
+  const [showDateModal, setShowDateModal] = useState(false);
+  const [completedDateRange, setCompletedDateRange] = useState<Range[]>([
+    {
+      startDate: undefined,
+      endDate: undefined,
+      key: 'selection',
+    },
+  ]);
 
   const handleCategoryClick = (label: string) => {
     setLabelFilter({ colour: label });
@@ -91,6 +104,7 @@ const Tasks = () => {
       };
     });
   };
+
   const isSorted = (task: Task) => task.priority && !task.completed;
   const isUnsorted = (task: Task) => !task.priority && !task.completed;
   const isCompleted = (task: Task) => task.completed;
@@ -108,7 +122,21 @@ const Tasks = () => {
         (filters.completed && isCompleted(t))
       )
     );
-    return matchesFilters || isParentOfVisibleSubtask;
+    const start = completedDateRange[0].startDate;
+    const end = completedDateRange[0].endDate;
+
+    const matchesDateRange =
+      !filters.completed || !start || !end || !task.completedDate
+        ? true
+        : new Date(task.completedDate) >= start &&
+        new Date(task.completedDate) <= end;
+
+    return (
+      (filters.completed
+        ? (matchesFilters && matchesDateRange)
+        : matchesFilters) ||
+      (isParentOfVisibleSubtask && matchesDateRange)
+    );
   });
 
   // Apply sorting based on selected field and order
@@ -245,6 +273,22 @@ const Tasks = () => {
         </Button>
       </div>
 
+      {filters.completed && (
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          onClick={() => setShowDateModal(true)}
+        >
+          📅 Filter by Completion Date
+        </Button>
+      )}
+
+      {filters.completed && completedDateRange[0].startDate && completedDateRange[0].endDate && (
+        <div className="text-muted mb-2">
+          Filtering from <strong>{completedDateRange[0].startDate?.toLocaleDateString()}</strong> to <strong>{completedDateRange[0].endDate?.toLocaleDateString()}</strong>
+        </div>
+      )}
+
       {/* Sort field and order controls */}
       <div className="d-flex flex-wrap align-items-center gap-6 mb-5">
         <Form.Label className="mb-0 me-2 fw-semibold">Sort By:</Form.Label>
@@ -333,6 +377,40 @@ const Tasks = () => {
 
       <CreateTaskButton />
       <CategoryManagerButton />
+
+      {/* Completed Date Filter Modal */}
+      <Modal show={showDateModal} onHide={() => setShowDateModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Completion Date Range</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <DateRange
+            editableDateInputs={true}
+            onChange={(item) => setCompletedDateRange([item.selection])}
+            moveRangeOnFirstSelection={false}
+            ranges={completedDateRange}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-danger" onClick={() => {
+            setCompletedDateRange([{
+              startDate: undefined,
+              endDate: undefined,
+              key: 'selection',
+            }]);
+            setShowDateModal(false);
+          }}>
+            Clear Filter
+          </Button>
+          <Button variant="secondary" onClick={() => setShowDateModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={() => setShowDateModal(false)}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
     </Container>
   );
 };
