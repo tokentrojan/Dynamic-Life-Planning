@@ -247,7 +247,7 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   return (
     <Modal show={show} onHide={onClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>{isEditing ? "Edit Task" : "Create Task"}</Modal.Title>
+        <Modal.Title>{isExistingTask ? "Edit Task" : "Create Task"}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
