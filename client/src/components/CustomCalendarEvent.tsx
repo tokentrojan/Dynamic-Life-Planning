@@ -2,7 +2,7 @@ import React from "react";
 import { Task } from "../types/Task";
 import { BsFlagFill } from "react-icons/bs";
 
-// Maps internal category keys (cat1…cat6) to Bootstrap theme colors.
+// Category background colors
 const categoryColorMap: Record<string, string> = {
   cat1: "#dc3545", // Red
   cat2: "#0d6efd", // Blue
@@ -12,7 +12,6 @@ const categoryColorMap: Record<string, string> = {
   cat6: "#000000", // Black
 };
 
-// Priority colors for flag icon
 const getPriorityColor = (priority?: string): string => {
   switch (priority) {
     case "high":
@@ -20,7 +19,7 @@ const getPriorityColor = (priority?: string): string => {
     case "medium":
       return "orange";
     case "low":
-      return "green";
+      return "lightgreen";
     default:
       return "gray";
   }
@@ -31,20 +30,25 @@ type Props = {
 };
 
 const CustomCalendarEvent: React.FC<Props> = ({ event }) => {
-  const categoryBorder = categoryColorMap[event.colour ?? ""] || "#dee2e6"; // fallback to light grey
+  const categoryBg = categoryColorMap[event.colour ?? ""] || "#6c757d";
+  
 
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
-        borderLeft: `4px solid ${categoryBorder}`,
+        borderLeft: `6px solid ${categoryBg}`,
         padding: "4px 6px",
         fontSize: "0.85rem",
-        height: "100%", // Makes vertical height match duration
+        fontWeight: 600,
+        height: "100%",
         overflow: "hidden",
-        backgroundColor: "white",
+        whiteSpace: "nowrap",
+        textOverflow: "ellipsis",
+        backgroundColor: "#ffff",
         borderRadius: "4px",
+        color: categoryBg,
       }}
     >
       {event.priority && (
@@ -57,7 +61,7 @@ const CustomCalendarEvent: React.FC<Props> = ({ event }) => {
           }}
         />
       )}
-      <span style={{ fontWeight: 600, textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+      <span style={{ textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis" }}>
         {event.taskName}
       </span>
     </div>

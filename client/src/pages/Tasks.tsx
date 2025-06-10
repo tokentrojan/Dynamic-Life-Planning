@@ -236,7 +236,11 @@ const Tasks = () => {
 
   return (
     <Container className="mt-4">
-      <h2 className="mb-3">Tasks</h2>
+      <h2 
+        className="mb-3"
+        style={{
+          textAlign: "center",
+        }} >Tasks</h2>
 
       {/* Filter checkboxes */}
       <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
