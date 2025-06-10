@@ -15,7 +15,6 @@ interface TaskModalProps {
   parentID?: string | null;
 }
 
-
 function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   const isExistingTask = !!task; // true if editing/viewing, false if creating
   const [isEditing, setIsEditing] = useState(!task); // if no task, we're creating
