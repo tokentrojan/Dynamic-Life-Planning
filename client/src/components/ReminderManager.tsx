@@ -55,7 +55,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({ tasks }) => {
           setVisibleReminders((prev) => [...prev, task]);
         }
       });
-    }, 60000); // Run the check every 30 seconds
+    }, 10000); // Run the check every 30 seconds
 
     // Cleanup the interval timer when the component is unmounted
     return () => clearInterval(interval);
