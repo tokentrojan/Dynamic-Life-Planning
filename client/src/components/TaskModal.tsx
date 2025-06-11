@@ -38,71 +38,71 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
 
 
   // Populate form state when task changes OR reset when creating
- useEffect(() => {
-  const fetchCompletableStatus = async () => {
-    const userId = auth.currentUser?.uid || localStorage.getItem("cachedUID");
-    if (!userId) return;
+  useEffect(() => {
+    const fetchCompletableStatus = async () => {
+      const userId = auth.currentUser?.uid || localStorage.getItem("cachedUID");
+      if (!userId) return;
 
-    if (show && task) {
-      // Viewing/editing an existing task
-      if (task.parentID) {
-        const parentRef = doc(db, 'users', userId, 'tasks', task.parentID);
-        try {
-          const parentSnap = await getDoc(parentRef);
-          const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
-          setCompletable(isParentCompleted);//true if parent is complete, otherwise false
-        } catch {
-          setCompletable(true); // on error make task completable 
+      if (show && task) {
+        // Viewing/editing an existing task
+        if (task.parentID) {
+          const parentRef = doc(db, 'users', userId, 'tasks', task.parentID);
+          try {
+            const parentSnap = await getDoc(parentRef);
+            const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
+            setCompletable(isParentCompleted);//true if parent is complete, otherwise false
+          } catch {
+            setCompletable(true); // on error make task completable 
+          }
+        } else {
+          setCompletable(true); // no parent, task is completable
         }
+
+        // Load the task into form
+        setTaskName(task.taskName);
+        setTaskDescription(task.taskDescription);
+        setDueDate(task.dueDate);
+        setDoDate(task.doDate ?? "");
+        setPriority(task.priority ?? "");
+        setDuration(task.duration ?? "");
+        setRecurring(task.recurring ?? false);
+        setRecurringDay(task.recurringDay ?? "");
+        setCompleted(task.completed ?? false);
+        setColour(task.colour ?? "");
+        setReminderOffsetMinutes(task.reminderOffsetMinutes ?? 5);
+        setIsEditing(false);
       } else {
-        setCompletable(true); // no parent, task is completable
-      }
+        // Creating a new task
+        setTaskName("");
+        setTaskDescription("");
+        setDueDate("");
+        setDoDate("");
+        setPriority("");
+        setDuration("");
+        setRecurring(false);
+        setRecurringDay("");
+        setCompleted(false);
+        setColour("");
+        setReminderOffsetMinutes(5);
+        setIsEditing(true);
 
-      // Load the task into form
-      setTaskName(task.taskName);
-      setTaskDescription(task.taskDescription);
-      setDueDate(task.dueDate);
-      setDoDate(task.doDate ?? "");
-      setPriority(task.priority ?? "");
-      setDuration(task.duration ?? "");
-      setRecurring(task.recurring ?? false);
-      setRecurringDay(task.recurringDay ?? "");
-      setCompleted(task.completed ?? false);
-      setColour(task.colour ?? "");
-      setReminderOffsetMinutes(task.reminderOffsetMinutes ?? 5);
-      setIsEditing(false);
-    } else {
-      // Creating a new task
-      setTaskName("");
-      setTaskDescription("");
-      setDueDate("");
-      setDoDate("");
-      setPriority("");
-      setDuration("");
-      setRecurring(false);
-      setRecurringDay("");
-      setCompleted(false);
-      setColour("");
-      setReminderOffsetMinutes(5);
-      setIsEditing(true);
-
-      if (parentID) {
-        const parentRef = doc(db, 'users', userId, 'tasks', parentID);
-        try {
-          const parentSnap = await getDoc(parentRef);
-          const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
-          setCompletable(isParentCompleted);
-        } catch {
-          setCompletable(false); // default to false
+        if (parentID) {
+          const parentRef = doc(db, 'users', userId, 'tasks', parentID);
+          try {
+            const parentSnap = await getDoc(parentRef);
+            const isParentCompleted = parentSnap.exists() && parentSnap.data().completed === true;
+            setCompletable(isParentCompleted);
+          } catch {
+            setCompletable(false); // default to false
+          }
+        } else {
+          setCompletable(true);
         }
-      } else {
-        setCompletable(true);
       }
-    }
-  };
+    };
 
-  fetchCompletableStatus();
-}, [task, show, parentID]);
+    fetchCompletableStatus();
+  }, [task, show, parentID]);
 
 
   // Maps your internal category keys (cat1…cat6) to Bootstrap badge variants.
@@ -162,7 +162,9 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
   };
 
   // Save or create task
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const userID = auth.currentUser?.uid || localStorage.getItem("cachedUID");
     if (!userID) return;
 
@@ -250,195 +252,198 @@ function TaskModal({ task, show, onClose, parentID }: TaskModalProps) {
         <Modal.Title>{isExistingTask ? "Edit Task" : "Create Task"}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
-        {!isEditing ? (
-          // View Mode Card
-          <Card className="p-3 shadow-sm">
-            <div className="d-flex justify-content-between align-items-start mb-2">
-              <h3
-                className="mb-3"
-                style={{
-                  fontSize: "1.75rem",
-                  fontWeight: 800,
-                  color: darkenedTitleColor,
-                  textTransform: "uppercase",
-                }}
-              >
-                {taskName}
-              </h3>
-              <div>
-                {priority && (
-                  <Badge bg={getPriorityBadgeColor(priority)} className="me-2">
-                    {priority.toUpperCase()}
-                  </Badge>
-                )}
-                {colour && (
-                  <Badge bg={getColourBadgeColor(colour)} className="me-2">
-                    {categories[colour]?.toUpperCase() ?? colour.toUpperCase()}
-                  </Badge>
-                )}
-                {recurring && recurringDay && (
-                  <Badge bg="info" className="me-2">
-                    Repeats: {recurringDay}
-                  </Badge>
-                )}
-                {completed && <Badge bg="secondary">Completed</Badge>}
-              </div>
-            </div>
+      <Form onSubmit={handleSave}>
 
-            <p className="text-muted mb-1">Due: {formatDate(dueDate)}</p>
-            {doDate && <p className="text-muted mb-3">Do: {formatDate(doDate)}</p>}
-
-            <p style={{ whiteSpace: "pre-wrap" }}>{taskDescription}</p>
-          </Card>
-        ) : (
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Task Name *</Form.Label>
-              <Form.Control
-                type="text"
-                value={taskName}
-                onChange={(e) => setTaskName(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Description *</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={taskDescription}
-                onChange={(e) => setTaskDescription(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Due Date *</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                required
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Do Date</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                value={doDate}
-                onChange={(e) => setDoDate(e.target.value)}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Priority</Form.Label>
-              <Form.Select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="">-- None --</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Category</Form.Label>
-              <Form.Select
-                value={colour}
-                onChange={(e) => setColour(e.target.value)}
-              >
-                <option value="">-- None --</option>
-                {Object.entries(categories).map(([catKey, catLabel]) => {
-                  const variant = getColourBadgeColor(catKey);
-                  const emoji = variantEmojiMap[variant] || "";
-                  return (
-                    <option key={catKey} value={catKey}>
-                      {emoji} {catLabel}
-                    </option>
-                  );
-                })}
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Reminder (minutes before)</Form.Label>
-              <Form.Control
-                type="number"
-                min={1}
-                max={1440}
-                value={reminderOffsetMinutes}
-                onChange={(e) => setReminderOffsetMinutes(Number(e.target.value))}
-              />
-            </Form.Group>
-
-            <Form.Check
-              type="checkbox"
-              label={
-                <>
-                  Completed{" "}
-                  {!completable && <small className="text-muted">(parent task incomplete)</small>}
-                </>
-              }
-              checked={completed}
-              disabled={!completable}
-              onChange={(e) => setCompleted(e.target.checked)}
-              className="mb-3"
-            />
-
-            <Form.Check
-              type="checkbox"
-              label="Recurring"
-              checked={recurring}
-              onChange={(e) => setRecurring(e.target.checked)}
-              className="mb-2"
-            />
-
-            {recurring && (
-              <Form.Group className="mb-3">
-                <Form.Label>Recurring Day</Form.Label>
-                <Form.Select
-                  value={recurringDay}
-                  onChange={(e) => setRecurringDay(e.target.value)}
+        <Modal.Body>
+          {!isEditing ? (
+            // View Mode Card
+            <Card className="p-3 shadow-sm">
+              <div className="d-flex justify-content-between align-items-start mb-2">
+                <h3
+                  className="mb-3"
+                  style={{
+                    fontSize: "1.75rem",
+                    fontWeight: 800,
+                    color: darkenedTitleColor,
+                    textTransform: "uppercase",
+                  }}
                 >
-                  <option value="">-- Select --</option>
-                  <option value="Monday">Monday</option>
-                  <option value="Tuesday">Tuesday</option>
-                  <option value="Wednesday">Wednesday</option>
-                  <option value="Thursday">Thursday</option>
-                  <option value="Friday">Friday</option>
-                  <option value="Saturday">Saturday</option>
-                  <option value="Sunday">Sunday</option>
+                  {taskName}
+                </h3>
+                <div>
+                  {priority && (
+                    <Badge bg={getPriorityBadgeColor(priority)} className="me-2">
+                      {priority.toUpperCase()}
+                    </Badge>
+                  )}
+                  {colour && (
+                    <Badge bg={getColourBadgeColor(colour)} className="me-2">
+                      {categories[colour]?.toUpperCase() ?? colour.toUpperCase()}
+                    </Badge>
+                  )}
+                  {recurring && recurringDay && (
+                    <Badge bg="info" className="me-2">
+                      Repeats: {recurringDay}
+                    </Badge>
+                  )}
+                  {completed && <Badge bg="secondary">Completed</Badge>}
+                </div>
+              </div>
+
+              <p className="text-muted mb-1">Due: {formatDate(dueDate)}</p>
+              {doDate && <p className="text-muted mb-3">Do: {formatDate(doDate)}</p>}
+
+              <p style={{ whiteSpace: "pre-wrap" }}>{taskDescription}</p>
+            </Card>
+          ) : (//edit mode
+            <>
+              <Form.Group className="mb-3">
+                <Form.Label>Task Name *</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={taskName}
+                  onChange={(e) => setTaskName(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Description *</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={taskDescription}
+                  onChange={(e) => setTaskDescription(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Due Date *</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Do Date</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  value={doDate}
+                  onChange={(e) => setDoDate(e.target.value)}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Priority</Form.Label>
+                <Form.Select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                >
+                  <option value="">-- None --</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </Form.Select>
               </Form.Group>
-            )}
-          </Form>
-        )}
-      </Modal.Body>
 
-      <Modal.Footer>
-        {isExistingTask && !isEditing ? (
-          <Button variant="primary" onClick={() => setIsEditing(true)}>
-            Edit
-          </Button>
-        ) : (
-          <>
-            <Button variant="secondary" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button
-              variant={isExistingTask ? "success" : "primary"}
-              onClick={handleSave}
-            >
-              {isExistingTask ? "Save Changes" : "Create Task"}
-            </Button>
+              <Form.Group className="mb-3">
+                <Form.Label>Category</Form.Label>
+                <Form.Select
+                  value={colour}
+                  onChange={(e) => setColour(e.target.value)}
+                >
+                  <option value="">-- None --</option>
+                  {Object.entries(categories).map(([catKey, catLabel]) => {
+                    const variant = getColourBadgeColor(catKey);
+                    const emoji = variantEmojiMap[variant] || "";
+                    return (
+                      <option key={catKey} value={catKey}>
+                        {emoji} {catLabel}
+                      </option>
+                    );
+                  })}
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Reminder (minutes before)</Form.Label>
+                <Form.Control
+                  type="number"
+                  min={1}
+                  max={1440}
+                  value={reminderOffsetMinutes}
+                  onChange={(e) => setReminderOffsetMinutes(Number(e.target.value))}
+                />
+              </Form.Group>
+
+              <Form.Check
+                type="checkbox"
+                label={
+                  <>
+                    Completed{" "}
+                    {!completable && <small className="text-muted">(parent task incomplete)</small>}
+                  </>
+                }
+                checked={completed}
+                disabled={!completable}
+                onChange={(e) => setCompleted(e.target.checked)}
+                className="mb-3"
+              />
+
+              <Form.Check
+                type="checkbox"
+                label="Recurring"
+                checked={recurring}
+                onChange={(e) => setRecurring(e.target.checked)}
+                className="mb-2"
+              />
+              
+              {recurring && (
+            <Form.Group className="mb-3">
+              <Form.Label>Recurring Day</Form.Label>
+              <Form.Select
+                value={recurringDay}
+                onChange={(e) => setRecurringDay(e.target.value)}
+              >
+                <option value="">-- Select --</option>
+                <option value="Monday">Monday</option>
+                <option value="Tuesday">Tuesday</option>
+                <option value="Wednesday">Wednesday</option>
+                <option value="Thursday">Thursday</option>
+                <option value="Friday">Friday</option>
+                <option value="Saturday">Saturday</option>
+                <option value="Sunday">Sunday</option>
+              </Form.Select>
+            </Form.Group>
+          )}
           </>
-        )}
-      </Modal.Footer>
+          )}
+        </Modal.Body>
+
+        <Modal.Footer>
+          {isExistingTask && !isEditing ? (
+            <Button variant="primary" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button>
+          ) : (
+            <>
+              <Button variant="secondary" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                variant={isExistingTask ? "success" : "primary"}
+                type="submit"            >
+                {isExistingTask ? "Save Changes" : "Create Task"}
+              </Button>
+            </>
+          )}
+        </Modal.Footer>
+
+      </Form>
     </Modal>
   );
 }
