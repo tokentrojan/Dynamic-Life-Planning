@@ -36,7 +36,7 @@ export const ReminderManager: React.FC<ReminderManagerProps> = ({ tasks }) => {
         const alreadyReminded = remindedTaskIDs.current.has(task.taskID);
 
         // If the current time is within 1 minute of the reminder time and it hasn't been triggered yet
-        if (timeDiff >= 0 && timeDiff < 60000 && !alreadyReminded) {
+        if (timeDiff >= 0 && timeDiff < 120000 && !alreadyReminded) {
           // Show a browser notification if permission is granted
           if (Notification.permission === "granted") {
             new Notification("Task Reminder", {
